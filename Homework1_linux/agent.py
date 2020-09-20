@@ -89,6 +89,17 @@ class TeamNameMinimaxAgent(Agent):
 
         valueP1 = 0 #我们的棋子的hx值
         valueP2 = 0 #敌人的棋子的hx值
+        averOfRowP1 = 0#我们棋子行数的平均值
+        averOfRowP2 = 0#敌人棋子行数的平均值
+        totalDiffRowP1 = 0#我们棋子行数与平均值的差的和
+        totalDiffRowP2 = 0#The sum of differences of the values of row of opponent's pieces and their average
+
+        for onePiece in posPlayer1:
+            averOfRowP1 += onePiece[0]
+        for onePiece in posPlayer2:
+            averOfRowP2 += onePiece[0]
+        averOfRowP1 = averOfRowP1/10
+        averOfRowP2 = averOfRowP2/10
 
         # Calculating the hx value of a given state of board
         for row, column,piece_type in posPlayer1:#valueP1越小，p1越接近胜利
@@ -99,6 +110,7 @@ class TeamNameMinimaxAgent(Agent):
                 left = (10-abs(row-10))//2
                 right = left+1
                 valueP1 += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
+            totalDiffRowP1 += abs(row-averOfRowP1)
             if piece_type == 1 and ([row,column] in p1Type1Target):
                 valueP1 -= 5
             if piece_type == 3 and ([row,column] in p1Type3Target):
@@ -113,30 +125,15 @@ class TeamNameMinimaxAgent(Agent):
                 left = (10-abs(row-10))//2
                 right = left+1
                 valueP2 += row + 3 * math.log(min(abs(column-left),abs(column-right))+1,5)
+            totalDiffRowP2 += abs(row-averOfRowP2)
             if piece_type == 2 and ([row,column] in p2Type2Target):
                 valueP2 += 5
             if piece_type == 4 and ([row,column] in p2Type4Target):
                 valueP2 += 5
 
-        value = valueP1 - valueP2
-
-        #The idea of defining the intensity of how cluster the pieces do:
-        #We focus on the max distance of row and column of our pieces
-        #
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        densityP1 = math.log(totalDiffRowP1)
+        densityP2 = math.log(totalDiffRowP2)
+        value = valueP1 - valueP2 - densityP1 + densityP2
         '''
         for row, y in posPlayer2:
             if (row-1)%2==0:#row is in odd row,hence,a middle point erowists.

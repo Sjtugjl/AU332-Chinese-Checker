@@ -50,7 +50,7 @@ class ChineseChecker(object):
         player = state[0]
         board = copy.deepcopy(state[1])
         #assert board.board_status[action[0]] == player
-        #as sert board.board_status[action[1]] == 0
+        #assert board.board_status[action[1]] == 0
         board.board_status[action[1]] = board.board_status[action[0]]
         board.board_status[action[0]] = 0
         return (

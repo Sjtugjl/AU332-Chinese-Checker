@@ -79,24 +79,61 @@ class TeamNameMinimaxAgent(Agent):
             return 0        # Min revenue
 
         posPlayer1 = state[1].getPlayerPiecePositions1(1)
+        posPlayer2 = state[1].getPlayerPiecePositions1(2)
 
-        #posPlayer2 = state[1].getPlayerPiecePositions1(2)
+        p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
+        p1Type3Target = [[2, 1], [2, 2], [3, 2]]
 
-        p1Type1Target = {[1,1],[3,1],[3,3],[4,1],[4,2],[4,3],[4,4]}
-        p1Type3Target = {[2,1],[2,2],[3,2]}
+        p2Type2Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
+        p2Type4Target = [[2, 1], [2, 2], [3, 2]]
 
-        for row, column,piece_type in posPlayer1:
+        valueP1 = 0 #我们的棋子的hx值
+        valueP2 = 0 #敌人的棋子的hx值
+
+        # Calculating the hx value of a given state of board
+        for row, column,piece_type in posPlayer1:#valueP1越小，p1越接近胜利
             if (row-1)%2==0:#row is in odd row,hence,a middle point exists.
                 left = (10-abs(row-10))//2 + 1
-                value += row + 3 * math.log(abs(column-left) + 1, 5)
+                valueP1 += row + 3 * math.log(abs(column-left) + 1, 5)
             else:
                 left = (10-abs(row-10))//2
                 right = left+1
-                value += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
+                valueP1 += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
             if piece_type == 1 and ([row,column] in p1Type1Target):
-                value -= 5
+                valueP1 -= 5
             if piece_type == 3 and ([row,column] in p1Type3Target):
-                value -= 5
+                valueP1 -= 5
+        valueP1 = 1000 - valueP1
+
+        for row, column,piece_type in posPlayer2:#valueP2越大，p2越接近胜利
+            if (row-1)%2==0:#row is in odd row,hence,a middle point exists.
+                left = (10-abs(row-10))//2 + 1
+                valueP2 += row + 3 * math.log(abs(column-left) + 1, 5)
+            else:
+                left = (10-abs(row-10))//2
+                right = left+1
+                valueP2 += row + 3 * math.log(min(abs(column-left),abs(column-right))+1,5)
+            if piece_type == 2 and ([row,column] in p2Type2Target):
+                valueP2 += 5
+            if piece_type == 4 and ([row,column] in p2Type4Target):
+                valueP2 += 5
+
+        value = valueP1 - valueP2
+
+        #The idea of defining the intensity of how cluster the pieces do:
+        #We focus on the max distance of row and column of our pieces
+        #
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -111,8 +148,7 @@ class TeamNameMinimaxAgent(Agent):
                 value += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
         '''
 
-        value = 1000 - value
-                
+
         return value
 
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):

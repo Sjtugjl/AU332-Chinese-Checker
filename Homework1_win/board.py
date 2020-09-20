@@ -106,6 +106,16 @@ class Board(object):
                    if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
         return result1 + result2
 
+    def getPlayerPiecePositions1(self, player):
+        # return a list of positions that player's pieces occupy
+        result1 = [(row, col, self.board_status[(row, col)]) for row in range(1, self.size + 1) for col in
+                   range(1, self.getColNum(row) + 1) \
+                   if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
+        result2 = [(row, col, self.board_status[(row, col)]) for row in range(self.size + 1, self.size * 2) for col in
+                   range(1, self.getColNum(row) + 1) \
+                   if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
+        return result1 + result2
+
     def getOneDirectionHopPosition(self, pos, dir_func):
         # return possible target hop position in the direction designated by dir_func
         # our rule: can hop as long as there's only one piece on the line between current position and target position

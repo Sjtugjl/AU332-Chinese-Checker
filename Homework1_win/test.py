@@ -1,6 +1,43 @@
+# from game import ChineseChecker
+# import datetime
+# import tkinter as tk
+# from UI import GameBoard
+# import time
+# import random
+#
+# class Agent(object):
+#     def __init__(self, game):
+#         self.game = game
+#
+#     def getAction(self, state):
+#         raise Exception("Not implemented yet")
+#
+# class RandomAgent(Agent):
+#     def getAction(self, state):
+#         legal_actions = self.game.actions(state)
+#         self.action = random.choice(legal_actions)
+#
+# ccgame = ChineseChecker(10, 4)
+# ppp = RandomAgent(ccgame)
+# state = ccgame.startState()
+# root = tk.Tk()
+# board = GameBoard(root, ccgame.size, ccgame.size * 2 - 1, ccgame.board)
+# board.pack(side="top", fill="both", expand="true", padx=4, pady=4)
+# board.board = state[1]
+# board.draw()
+# board.update_idletasks()
+# board.update()
+#
+# player = ccgame.player(state)
+# # function agent.getAction() modify class member action
+# time1 = time.time()
+# ppp.getAction(state)
+# time2 = time.time()
+# print(type(ppp.action))
+
 import random, re, datetime
 import copy
-import math, sys
+import math
 
 
 class Agent(object):
@@ -37,87 +74,49 @@ class SimpleGreedyAgent(Agent):
         self.action = random.choice(max_actions)
 
 
-
 class TeamNameMinimaxAgent(Agent):
-    def sortkey0(self, func):
-        return func[0]
+    def get_next_actions(self, state, action):
+        state = self.game.succ(state, action)
+        next_actions = self.game.actions(state)
+        return next_actions
 
-    def sortkey1(self, func):
-        return func[1]
-
-    def sortdiff(self, func):
-        return func[1][0] - func[0][0]
-
-    def findTwosides(self, player, pos):
-        if player == 1:
-            pos.sort(key = self.sortkey0)
-            firstrow = pos[0][0]
-            lastrow = pos[-1][0]
-        else:
-            pos.sort(key = self.sortkey0)
-            firstrow = pos[-1][0]
-            lastrow = pos[0][0]
-
-        return firstrow, lastrow
-
-############### 开局部分评价函数值 ########################################
-    def startevaluation(self, state):  # 开局部分的评价函数
-        pass
-
-############   开局部分找最大评价分 #######################################
-    def maxStart(self, state, layer):
-        value = min_num
-        player = state[0]
-        legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
-        legal_actions.sort(key=self.sortdiff)
-
-        if layer == 0:
-            return self.startevaluation(state)
-
-        if player == 2:
-            legal_actions = legal_actions[::-1]
-
-        for action in legal_actions:
-            naction = self.maxStart((player, self.game.succ(state, action)[1]), layer - 1)
-            if value < naction:
-                value = naction
-        return value
-
-############### 开局部总函数 ############################################
-    def firstPeriod(self, state):
+    def getAction(self, state):
         global step
-        player = state[0]
+        # print("Here T")
         legal_actions = self.game.actions(state)
+
         self.action = random.choice(legal_actions)
-        legal_actions.sort(key=self.sortdiff)
 
+        player = self.game.player(state)
+        ### START CODE HERE ###
+        board = state[1]
+
+        # Define score of current state := value = 1000 - sum(row_num of all P1 and P2 pieces)
         if player == 1:
-            if step == 1:
-                self.action = ((16,1), (15,1))
-            else:
-                value = max_num
-                for action in legal_actions:
-                    max_action_value = self.maxStart(self.game.succ(state, action), 2)
-                    if max_action_value > value:
-                        value = max_action_value
-                        self.action = action
+            value = 0  # 0 is smallest revenue
+            for action in legal_actions:
+                minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), 0, 400, 1, 2)
+                if minimax_action_value > value:
+                    value = minimax_action_value
+                    self.action = action
+        # else:
+        #     value = 400    # 400 is greatest revenue
+        #     for action in legal_actions:
+        #         v = self.MinimaxAlgi(self.game.succ(state, action), 0, 400, 1, 2)
+        #         if v < value:
+        #             value = v
+        #             self.action = action
+        step += 1
+        print("step:", step)
 
-        # if player == 2:
-        #     if step == 1:
-        #         self.action = ((4,1), (5,1))
-        #     else:
-        return
-
-############### 中期部分评价函数 #########################################
     def EvaluationFunction(self, state):
         value = 0
 
         end, winner = state[1].isEnd(100)
         if end:
             if winner == 1:
-                return max_num  # Max revenue
-            return min_num  # Min revenue
+                return 1000  # Max revenue
+            return 0  # Min revenue
 
         posPlayer1 = state[1].getPlayerPiecePositions1(1)
         posPlayer2 = state[1].getPlayerPiecePositions1(2)
@@ -175,7 +174,6 @@ class TeamNameMinimaxAgent(Agent):
         densityP1 = math.log(totalDiffRowP1)
         densityP2 = math.log(totalDiffRowP2)
         value = valueP1 - valueP2 - densityP1 + densityP2
-
         '''
         for row, y in posPlayer2:
             if (row-1)%2==0:#row is in odd row,hence,a middle point erowists.
@@ -187,97 +185,38 @@ class TeamNameMinimaxAgent(Agent):
                 value += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
         '''
 
-
         return value
 
-############### 中期找最大最小评价分 ######################################
+
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
         if current_d == max_d:
             return self.EvaluationFunction(state)
-        legal_actions.sort(key = self.sortdiff)
-        legal_actions = legal_actions[::-1]
-
+        legal_actions.sort(key=self.takeDepth)
+        actions = legal_actions[::-1]
+        actions = legal_actions
         if player == 1:
-            value = min_num
-            for action in legal_actions:
-                value = max(value, self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
+            value = 0
+            for action in actions:
+                value = max(value, self.MinimaxAlgi(self.game.succ(state, action), 0, 1000, current_d + 1, max_d))
                 if value >= beta:
                     return value
                 alpha = max(alpha, value)
             return value
         else:
-            value = max_num
+            value = 1000
             for action in legal_actions:
-                value = min(value, self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
+                value = min(value, self.MinimaxAlgi(self.game.succ(state, action), 0, 1000, current_d + 1, max_d))
                 if value <= alpha:
                     return value
                 beta = min(beta, value)
             return value
 
-############### 中期总函数 ##############################################
-    def middlePeriod(self, state):
-        global step
-        player = state[0]
-        legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
-        legal_actions.sort(key=self.sortdiff)
-        for action in legal_actions:
-            minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, 1, 2)
-            if minimax_action_value > value:
-                value = minimax_action_value
-                self.action = action
 
-############### 收官部分评价函数值 ########################################
-    def lastevaluation(self, state):
-        pass
-
-############   收官部分找最大评价分 #######################################
-    def maxEnd(self, state, layer):
-
-############### 收官部总函数 ############################################
-    def lastPeriod(self, state):
-
-############### 总函数 #################################################
-    def getAction(self, state):
-
-        legal_actions = self.game.actions(state)
-
-        self.action = random.choice(legal_actions)
-
-        player = self.game.player(state)
-        ### START CODE HERE ###
-        global step
-        step += 1
-        board = state[1]
-        pos1 = board.getPlayerPiecePositions(1)
-        pos2 = board.getPlayerPiecePositions(2)
-        firstrow1, lastrow1 = self.findTwosides(1, pos1)
-        firstrow2, lastrow2 = self.findTwosides(2, pos2)
-
-        if player == 1:
-            value = 0  # 0 is smallest revenue
-            # The Start Part of Game
-            if firstrow1 >= firstrow2:
-                self.firstPeriod(state)
-                print("Now State", 1)
-            # The Middle Part of Game
-            elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
-                self.middlePeriod(state)
-                print("\nNow State", 2)
-            # The Ending Part of Game
-            elif lastrow1 < lastrow2:
-                self.lastPeriod(state)
-                print("Now State", 3)
-            else:
-                print("error in choose state of game.")
-
-        # else:  # Play As Player 2
-
-        print("Now step:", step)
+    def takeDepth(self, action):
+        return action[1][0] - action[0][0]
 
 step = 0
-max_num = sys.maxsize-1
-min_num = -sys.maxsize
+
         ### END CODE HERE ###

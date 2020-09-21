@@ -116,8 +116,8 @@ class TeamNameMinimaxAgent(Agent):
         end, winner = state[1].isEnd(100)
         if end:
             if winner == 1:
-                return max_num  # Max revenue
-            return min_num  # Min revenue
+                return 1000  # Max revenue
+            return 0  # Min revenue
 
         posPlayer1 = state[1].getPlayerPiecePositions1(1)
         posPlayer2 = state[1].getPlayerPiecePositions1(2)
@@ -125,25 +125,27 @@ class TeamNameMinimaxAgent(Agent):
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
 
-        p2Type2Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
-        p2Type4Target = [[2, 1], [2, 2], [3, 2]]
-
-        valueP1 = 0  # 我们的棋子的hx值
-        valueP2 = 0  # 敌人的棋子的hx值
-        averOfRowP1 = 0  # 我们棋子行数的平均值
-        averOfRowP2 = 0  # 敌人棋子行数的平均值
-        totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
-        totalDiffRowP2 = 0  # The sum of differences of the values of row of opponent's pieces and their average
-
-        for onePiece in posPlayer1:
-            averOfRowP1 += onePiece[0]
-        for onePiece in posPlayer2:
-            averOfRowP2 += onePiece[0]
-        averOfRowP1 = averOfRowP1 / 10
-        averOfRowP2 = averOfRowP2 / 10
+        p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
+        p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
         # Calculating the hx value of a given state of board
-        for row, column, piece_type in posPlayer1:  # valueP1越小，p1越接近胜利
+        valueP1 = self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
+        valueP2 = self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
+
+        # value = valueP1 - valueP2 + densityP2
+        value = valueP1 - valueP2
+        return value
+
+    def heuristicP1(self, pos, target1, target3):
+        valueP1 = 0  # 我们的棋子的hx值
+        averOfRowP1 = 0  # 我们棋子行数的平均值
+        totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+
+        for onePiece in pos:
+            averOfRowP1 += onePiece[0]
+        averOfRowP1 = averOfRowP1 / 10
+
+        for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
                 left = (10 - abs(row - 10)) // 2 + 1
                 valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
@@ -152,13 +154,25 @@ class TeamNameMinimaxAgent(Agent):
                 right = left + 1
                 valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
             totalDiffRowP1 += abs(row - averOfRowP1)
-            if piece_type == 1 and ([row, column] in p1Type1Target):
-                valueP1 -= 5
-            if piece_type == 3 and ([row, column] in p1Type3Target):
-                valueP1 -= 5
-        valueP1 = 1000 - valueP1
+            if piece_type == 1 and ([row, column] in target1):
+                valueP1 -= 4
+            if piece_type == 3 and ([row, column] in target3):
+                valueP1 -= 4
 
-        for row, column, piece_type in posPlayer2:  # valueP2越大，p2越接近胜利
+        divergence = math.log(totalDiffRowP1, 5)
+        valueP1 -= divergence
+        return 1000 - valueP1
+
+    def heuristicP2(self, pos, target2, target4):
+        valueP2 = 0  # 我们的棋子的hx值
+        averOfRowP2 = 0  # 我们棋子行数的平均值
+        totalDiffRowP2 = 0  # 我们棋子行数与平均值的差的和
+
+        for onePiece in pos:
+            averOfRowP2 += onePiece[0]
+        averOfRowP2 = averOfRowP2 / 10
+
+        for row, column, piece_type in pos:  # valueP2越大，p2越接近胜利
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
                 left = (10 - abs(row - 10)) // 2 + 1
                 valueP2 += row + 3 * math.log(abs(column - left) + 1, 5)
@@ -167,28 +181,14 @@ class TeamNameMinimaxAgent(Agent):
                 right = left + 1
                 valueP2 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
             totalDiffRowP2 += abs(row - averOfRowP2)
-            if piece_type == 2 and ([row, column] in p2Type2Target):
-                valueP2 += 5
-            if piece_type == 4 and ([row, column] in p2Type4Target):
-                valueP2 += 5
+            if piece_type == 2 and ([row, column] in target2):
+                valueP2 += 4
+            if piece_type == 4 and ([row, column] in target4):
+                valueP2 += 4
 
-        densityP1 = math.log(totalDiffRowP1)
-        densityP2 = math.log(totalDiffRowP2)
-        value = valueP1 - valueP2 - densityP1 + densityP2
-
-        '''
-        for row, y in posPlayer2:
-            if (row-1)%2==0:#row is in odd row,hence,a middle point erowists.
-                left = (10-abs(row-10))//2 + 1
-                value += row + 3 * math.log(abs(column-left) + 1, 5)
-            else:
-                left = (10-abs(row-10))//2
-                right = left+1
-                value += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
-        '''
-
-
-        return value
+        divergence = math.log(totalDiffRowP2, 5)
+        valueP2 -= divergence
+        return valueP2
 
 ############### 中期找最大最小评价分 ######################################
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):

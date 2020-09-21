@@ -1,6 +1,6 @@
 import random, re, datetime
 import copy
-import math
+import math, sys
 
 
 class Agent(object):
@@ -37,46 +37,87 @@ class SimpleGreedyAgent(Agent):
         self.action = random.choice(max_actions)
 
 
-class TeamNameMinimaxAgent(Agent):
-    def get_next_actions(self, state, action):
-        state = self.game.succ(state, action)
-        next_actions = self.game.actions(state)
-        return next_actions
-    
-    def getAction(self, state):
-        # print("Here T")
-        legal_actions = self.game.actions(state)
-        
-        self.action = random.choice(legal_actions)
 
-        player = self.game.player(state)
-        ### START CODE HERE ###
-        board = state[1]
-        
-        # Define score of current state := value = 1000 - sum(row_num of all P1 and P2 pieces)
+class TeamNameMinimaxAgent(Agent):
+    def sortkey0(self, func):
+        return func[0]
+
+    def sortkey1(self, func):
+        return func[1]
+
+    def sortdiff(self, func):
+        return func[1][0] - func[0][0]
+
+    def findTwosides(self, player, pos):
         if player == 1:
-            value = 0   # 0 is smallest revenue 
-            for action in legal_actions:
-                minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), 0, 400, 1, 2)
-                if minimax_action_value > value:
-                    value = minimax_action_value
-                    self.action = action
-        # else:
-        #     value = 400    # 400 is greatest revenue 
-        #     for action in legal_actions:
-        #         v = self.MinimaxAlgi(self.game.succ(state, action), 0, 400, 1, 2)
-        #         if v < value:
-        #             value = v
-        #             self.action = action
-                    
+            pos.sort(key = self.sortkey0)
+            firstrow = pos[0][0]
+            lastrow = pos[-1][0]
+        else:
+            pos.sort(key = self.sortkey0)
+            firstrow = pos[-1][0]
+            lastrow = pos[0][0]
+
+        return firstrow, lastrow
+
+############### 开局部分评价函数值 ########################################
+    def startevaluation(self, state):  # 开局部分的评价函数
+        pass
+
+############   开局部分找最大评价分 #######################################
+    def maxStart(self, state, layer):
+        value = min_num
+        player = state[0]
+        legal_actions = self.game.actions(state)
+        self.action = random.choice(legal_actions)
+        legal_actions.sort(key=self.sortdiff)
+
+        if layer == 0:
+            return self.startevaluation(state)
+
+        if player == 2:
+            legal_actions = legal_actions[::-1]
+
+        for action in legal_actions:
+            naction = self.maxStart((player, self.game.succ(state, action)[1]), layer - 1)
+            if value < naction:
+                value = naction
+        return value
+
+############### 开局部总函数 ############################################
+    def firstPeriod(self, state):
+        global step
+        player = state[0]
+        legal_actions = self.game.actions(state)
+        self.action = random.choice(legal_actions)
+        legal_actions.sort(key=self.sortdiff)
+
+        if player == 1:
+            if step == 1:
+                self.action = ((16,1), (15,1))
+            else:
+                value = max_num
+                for action in legal_actions:
+                    max_action_value = self.maxStart(self.game.succ(state, action), 2)
+                    if max_action_value > value:
+                        value = max_action_value
+                        self.action = action
+
+        # if player == 2:
+        #     if step == 1:
+        #         self.action = ((4,1), (5,1))
+        #     else:
+        return
+
+############### 中期部分评价函数 #########################################
     def EvaluationFunction(self, state):
         value = 0
-        
+
         end, winner = state[1].isEnd(100)
-        if end:  
+        if end:
             if winner == 1:
                 return 1000  # Max revenue
-            return 0        # Min revenue
+            return 0  # Min revenue
 
         posPlayer1 = state[1].getPlayerPiecePositions1(1)
         posPlayer2 = state[1].getPlayerPiecePositions1(2)
@@ -84,89 +125,161 @@ class TeamNameMinimaxAgent(Agent):
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
 
-        p2Type2Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
-        p2Type4Target = [[2, 1], [2, 2], [3, 2]]
-
-        valueP1 = 0 #我们的棋子的hx值
-        valueP2 = 0 #敌人的棋子的hx值
-        averOfRowP1 = 0#我们棋子行数的平均值
-        averOfRowP2 = 0#敌人棋子行数的平均值
-        totalDiffRowP1 = 0#我们棋子行数与平均值的差的和
-        totalDiffRowP2 = 0#The sum of differences of the values of row of opponent's pieces and their average
-
-        for onePiece in posPlayer1:
-            averOfRowP1 += onePiece[0]
-        for onePiece in posPlayer2:
-            averOfRowP2 += onePiece[0]
-        averOfRowP1 = averOfRowP1/10
-        averOfRowP2 = averOfRowP2/10
+        p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
+        p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
         # Calculating the hx value of a given state of board
-        for row, column,piece_type in posPlayer1:#valueP1越小，p1越接近胜利
-            if (row-1)%2==0:#row is in odd row,hence,a middle point exists.
-                left = (10-abs(row-10))//2 + 1
-                valueP1 += row + 3 * math.log(abs(column-left) + 1, 5)
-            else:
-                left = (10-abs(row-10))//2
-                right = left+1
-                valueP1 += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
-            totalDiffRowP1 += abs(row-averOfRowP1)
-            if piece_type == 1 and ([row,column] in p1Type1Target):
-                valueP1 -= 5
-            if piece_type == 3 and ([row,column] in p1Type3Target):
-                valueP1 -= 5
-        valueP1 = 1000 - valueP1
+        valueP1 = self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
+        valueP2 = self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
 
-        for row, column,piece_type in posPlayer2:#valueP2越大，p2越接近胜利
-            if (row-1)%2==0:#row is in odd row,hence,a middle point exists.
-                left = (10-abs(row-10))//2 + 1
-                valueP2 += row + 3 * math.log(abs(column-left) + 1, 5)
-            else:
-                left = (10-abs(row-10))//2
-                right = left+1
-                valueP2 += row + 3 * math.log(min(abs(column-left),abs(column-right))+1,5)
-            totalDiffRowP2 += abs(row-averOfRowP2)
-            if piece_type == 2 and ([row,column] in p2Type2Target):
-                valueP2 += 5
-            if piece_type == 4 and ([row,column] in p2Type4Target):
-                valueP2 += 5
-
-        densityP1 = math.log(totalDiffRowP1)
-        densityP2 = math.log(totalDiffRowP2)
-        value = valueP1 - valueP2 - densityP1 + densityP2
-        '''
-        for row, y in posPlayer2:
-            if (row-1)%2==0:#row is in odd row,hence,a middle point erowists.
-                left = (10-abs(row-10))//2 + 1
-                value += row + 3 * math.log(abs(column-left) + 1, 5)
-            else:
-                left = (10-abs(row-10))//2
-                right = left+1
-                value += row + 3* math.log(min(abs(column-left),abs(column-right))+1,5)
-        '''
-
-
+        # value = valueP1 - valueP2 + densityP2
+        value = valueP1 - valueP2
         return value
 
+    def heuristicP1(self, pos, target1, target3):
+        valueP1 = 0  # 我们的棋子的hx值
+        averOfRowP1 = 0  # 我们棋子行数的平均值
+        totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+
+        for onePiece in pos:
+            averOfRowP1 += onePiece[0]
+        averOfRowP1 = averOfRowP1 / 10
+
+        for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
+            if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
+                left = (10 - abs(row - 10)) // 2 + 1
+                valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
+            else:
+                left = (10 - abs(row - 10)) // 2
+                right = left + 1
+                valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
+            totalDiffRowP1 += abs(row - averOfRowP1)
+            if piece_type == 1 and ([row, column] in target1):
+                valueP1 -= 4
+            if piece_type == 3 and ([row, column] in target3):
+                valueP1 -= 4
+
+        divergence = math.log(totalDiffRowP1, 5)
+        valueP1 -= divergence
+        return 1000 - valueP1
+
+    def heuristicP2(self, pos, target2, target4):
+        valueP2 = 0  # 我们的棋子的hx值
+        averOfRowP2 = 0  # 我们棋子行数的平均值
+        totalDiffRowP2 = 0  # 我们棋子行数与平均值的差的和
+
+        for onePiece in pos:
+            averOfRowP2 += onePiece[0]
+        averOfRowP2 = averOfRowP2 / 10
+
+        for row, column, piece_type in pos:  # valueP2越大，p2越接近胜利
+            if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
+                left = (10 - abs(row - 10)) // 2 + 1
+                valueP2 += row + 3 * math.log(abs(column - left) + 1, 5)
+            else:
+                left = (10 - abs(row - 10)) // 2
+                right = left + 1
+                valueP2 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
+            totalDiffRowP2 += abs(row - averOfRowP2)
+            if piece_type == 2 and ([row, column] in target2):
+                valueP2 += 4
+            if piece_type == 4 and ([row, column] in target4):
+                valueP2 += 4
+
+        divergence = math.log(totalDiffRowP2, 5)
+        valueP2 -= divergence
+        return valueP2
+
+############### 中期找最大最小评价分 ######################################
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
         if current_d == max_d:
             return self.EvaluationFunction(state)
-        if player == 1: 
-            value = 0
+        legal_actions.sort(key = self.sortdiff)
+        legal_actions = legal_actions[::-1]
+
+        if player == 1:
+            value = min_num
             for action in legal_actions:
-                value = max(value, self.MinimaxAlgi(self.game.succ(state, action), 0, 1000, current_d + 1 , max_d))
+                value = max(value, self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
                 if value >= beta:
                     return value
                 alpha = max(alpha, value)
             return value
         else:
-            value = 1000
+            value = max_num
             for action in legal_actions:
-                value = min(value, self.MinimaxAlgi(self.game.succ(state, action), 0, 1000, current_d + 1, max_d))
+                value = min(value, self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
                 if value <= alpha:
-                    return  value
-                beta = min(beta,value)
+                    return value
+                beta = min(beta, value)
             return value
+
+############### 中期总函数 ##############################################
+    def middlePeriod(self, state):
+        global step
+        player = state[0]
+        legal_actions = self.game.actions(state)
+        self.action = random.choice(legal_actions)
+        legal_actions.sort(key=self.sortdiff)
+        for action in legal_actions:
+            minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, 1, 2)
+            if minimax_action_value > value:
+                value = minimax_action_value
+                self.action = action
+
+############### 收官部分评价函数值 ########################################
+    def lastevaluation(self, state):
+        pass
+
+############   收官部分找最大评价分 #######################################
+    def maxEnd(self, state, layer):
+        pass
+
+############### 收官部总函数 ############################################
+    def lastPeriod(self, state):
+        pass
+
+############### 总函数 #################################################
+    def getAction(self, state):
+
+        legal_actions = self.game.actions(state)
+
+        self.action = random.choice(legal_actions)
+
+        player = self.game.player(state)
+        ### START CODE HERE ###
+        global step
+        step += 1
+        board = state[1]
+        pos1 = board.getPlayerPiecePositions(1)
+        pos2 = board.getPlayerPiecePositions(2)
+        firstrow1, lastrow1 = self.findTwosides(1, pos1)
+        firstrow2, lastrow2 = self.findTwosides(2, pos2)
+
+        if player == 1:
+            value = 0  # 0 is smallest revenue
+            # The Start Part of Game
+            if firstrow1 >= firstrow2:
+                self.firstPeriod(state)
+                print("Now State", 1)
+            # The Middle Part of Game
+            elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
+                self.middlePeriod(state)
+                print("\nNow State", 2)
+            # The Ending Part of Game
+            elif lastrow1 < lastrow2:
+                self.lastPeriod(state)
+                print("Now State", 3)
+            else:
+                print("error in choose state of game.")
+
+        # else:  # Play As Player 2
+
+        print("Now step:", step)
+
+step = 0
+max_num = sys.maxsize-1
+min_num = -sys.maxsize
         ### END CODE HERE ###

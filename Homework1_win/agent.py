@@ -104,10 +104,11 @@ class TeamNameMinimaxAgent(Agent):
         # start = time.time()
         # iter = 0
         for action in legal_actions:
-            if action[0][0] - action[1][0] <= -1:
-                continue
+
             if action[0][0] <= 4:
                 continue
+            succor = self.game.succ(state, action)
+            posPlayer1 = succor[1].getPlayerPiecePositions1(1)
             naction = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
@@ -232,8 +233,9 @@ class TeamNameMinimaxAgent(Agent):
                     continue
                 if action[0][0] <= 4:
                     continue
+                succor = self.game.succ(state, action)
                 value = max(value,
-                            self.EvaluationFunction(state))
+                            self.EvaluationFunction(succor))
                 if value >= beta:
                     return value
                 alpha = max(alpha, value)
@@ -327,9 +329,14 @@ class TeamNameMinimaxAgent(Agent):
             legal_actions = legal_actions[::-1]
 
         for action in legal_actions:
+            if action[0][0] - action[1][0] <= -1:
+                continue
+            succor = self.game.succ(state, action)
+            posPlayer1 = succor[1].getPlayerPiecePositions1(1)
             naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
+        print("value", value, "action", action)
         return value
 
     ############### 收官部总函数 ############################################

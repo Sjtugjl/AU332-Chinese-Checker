@@ -108,8 +108,11 @@ class TeamNameMinimaxAgent(Agent):
 
         if player == 2:
             legal_actions = legal_actions[::-1]
-
         for action in legal_actions:
+            if action[0][0] - action[1][0] <= -1:
+                continue
+            if action[0][0] <= 4:
+                continue
             naction = self.maxStart((player, self.game.succ(state, action)[1]), layer - 1)
             if value < naction:
                 value = naction

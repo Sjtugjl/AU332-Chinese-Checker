@@ -95,6 +95,8 @@
       <workItem from="1600697957827" duration="134000" />
       <workItem from="1600698717103" duration="1251000" />
       <workItem from="1600754133260" duration="4283000" />
+      <workItem from="1600761421492" duration="59000" />
+      <workItem from="1600784664311" duration="331000" />
     </task>
     <servers />
   </component>
@@ -124,7 +126,7 @@
     <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1600701227370" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Homework1_win$runGame.coverage" NAME="runGame Coverage Results" MODIFIED="1600757515885" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Homework1_win$runGame.coverage" NAME="runGame Coverage Results" MODIFIED="1600784790650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Homework1_win$test.coverage" NAME="test Coverage Results" MODIFIED="1600685611720" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

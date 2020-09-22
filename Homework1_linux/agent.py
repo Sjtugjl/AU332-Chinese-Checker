@@ -119,9 +119,7 @@ class TeamNameMinimaxAgent(Agent):
         player = state[0]
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
-        print("random choose")
         legal_actions.sort(key=self.sortdiff)
-
         if player == 1:
             if step == 1:
                 self.action = ((16, 1), (15, 1))
@@ -131,9 +129,6 @@ class TeamNameMinimaxAgent(Agent):
                     max_action_value = self.maxStart(self.game.succ(state, action), 2)
                     if max_action_value > value:
                         value = max_action_value
-                        self.action = action
-                        print("start one set successful.")
-
         return
 
     ############### 中期部分评价函数 #########################################
@@ -226,8 +221,6 @@ class TeamNameMinimaxAgent(Agent):
         def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
-        # if current_d == max_d:
-        #     return self.EvaluationFunction(state)
         legal_actions.sort(key=self.sortdiff)
         legal_actions = legal_actions[::-1]
 
@@ -315,7 +308,7 @@ class TeamNameMinimaxAgent(Agent):
         return -valueP1
 
     ############   收官部分找最大评价分 #######################################
-    def maxEnd(self, state, layer):
+        def maxEnd(self, state, layer):
         value = min_num
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -329,22 +322,13 @@ class TeamNameMinimaxAgent(Agent):
         p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
         p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
-        if layer == 1:
-            return self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 1:
-            #     return self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 2:
-            #     return self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
-
         if player == 2:
             legal_actions = legal_actions[::-1]
 
         for action in legal_actions:
-            naction = self.maxEnd((player, self.game.succ(state, action)[1]), layer - 1)
+            naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
-                # self.action = action
-                # print("set final act successful.")
         return value
 
     ############### 收官部总函数 ############################################
@@ -356,17 +340,11 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions.sort(key=self.sortdiff)
 
         if player == 1:
-            if step == 1:
-                self.action = ((16, 1), (15, 1))
-            else:
-                value = min_num
-                for action in legal_actions:
-                    max_action_value = self.maxEnd(self.game.succ(state, action), 2)
-                    if max_action_value > value:
-                        value = max_action_value
-                        self.action = action
-                        print("set final successfel.")
-
+            value = min_num
+            for action in legal_actions:
+                max_action_value = self.maxEnd(self.game.succ(state, action), 2)
+                if max_action_value > value:
+                    value = max_action_value
         return
 
     ############### 总函数 #################################################

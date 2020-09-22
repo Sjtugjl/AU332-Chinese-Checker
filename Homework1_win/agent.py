@@ -320,18 +320,11 @@ class TeamNameMinimaxAgent(Agent):
         p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
         p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
-        if layer == 1:
-            return self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 1:
-            #     return self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 2:
-            #     return self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
-
         if player == 2:
             legal_actions = legal_actions[::-1]
 
         for action in legal_actions:
-            naction = self.maxEnd((player, self.game.succ(state, action)[1]), layer - 1)
+            naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
                 # self.action = action

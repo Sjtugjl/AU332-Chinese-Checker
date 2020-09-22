@@ -1,6 +1,6 @@
 import random, re, datetime
 import copy
-import math, sys
+import math, sys, time
 
 
 class Agent(object):
@@ -62,30 +62,30 @@ class TeamNameMinimaxAgent(Agent):
     ############### 开局部分评价函数值 ########################################
     def startevaluation(self, pos, target1, target3):  # 开局部分的评价函数
         valueP1 = 0  # 我们的棋子的hx值
-        # averOfRowP1 = 0  # 我们棋子行数的平均值
-        # totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+        averOfRowP1 = 0  # 我们棋子行数的平均值
+        totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
 
-        # for onePiece in pos:
-        #    averOfRowP1 += onePiece[0]
-        # averOfRowP1 = averOfRowP1 / 10
+        for onePiece in pos:
+           averOfRowP1 += onePiece[0]
+        averOfRowP1 = averOfRowP1 / 10
 
         for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
+                #left = (10 - abs(row - 10)) // 2 + 1
+                valueP1 += row #+ 3 * math.log(abs(column - left) + 1, 5)
             else:
-                left = (10 - abs(row - 10)) // 2
-                right = left + 1
-                valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            # totalDiffRowP1 += abs(row - averOfRowP1)
+                #left = (10 - abs(row - 10)) // 2
+                #right = left + 1
+                valueP1 += row #+ 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
+            totalDiffRowP1 += abs(row - averOfRowP1)
             # if piece_type == 1 and ([row, column] in target1):
             #    valueP1 -= 4
             # if piece_type == 3 and ([row, column] in target3):
             #    valueP1 -= 4
 
-        # divergence = math.log(totalDiffRowP1, 5)
-        # valueP1 -= divergence
-        return valueP1
+        divergence = math.log(totalDiffRowP1, 2)
+        valueP1 -= divergence
+        return 1000-valueP1
 
     ############   开局部分找最大评价分 #######################################
     def maxStart(self, state, layer):
@@ -96,24 +96,19 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions.sort(key=self.sortdiff)
 
         posPlayer1 = state[1].getPlayerPiecePositions1(1)
-        posPlayer2 = state[1].getPlayerPiecePositions1(2)
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
-        p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
-        p2Type4Target = [[18, 1], [18, 2], [17, 2]]
-
-        if layer == 1:
-            return self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 1:
-            #     return self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 2:
-            #     return self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
 
         if player == 2:
             legal_actions = legal_actions[::-1]
-
+        # start = time.time()
+        # iter = 0
         for action in legal_actions:
-            naction = self.maxStart((player, self.game.succ(state, action)[1]), layer - 1)
+            if action[0][0] - action[1][0] <= -1:
+                continue
+            if action[0][0] <= 4:
+                continue
+            naction = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
         return value
@@ -124,7 +119,7 @@ class TeamNameMinimaxAgent(Agent):
         player = state[0]
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
-        print("random choose")
+        # print("random choose")
         legal_actions.sort(key=self.sortdiff)
 
         if player == 1:
@@ -137,7 +132,7 @@ class TeamNameMinimaxAgent(Agent):
                     if max_action_value > value:
                         value = max_action_value
                         self.action = action
-                        print("start one set successful.")
+                        # print("start one set successful.")
 
         return
 
@@ -194,7 +189,7 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 3 and ([row, column] in target3):
                 valueP1 -= 7
 
-        divergence = math.log(totalDiffRowP1, 5)
+        divergence = math.log(totalDiffRowP1, 2)
         valueP1 -= divergence
         return 1000 - valueP1
 
@@ -224,7 +219,7 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 4 and ([row, column] in target4):
                 valueP2 += 7
 
-        divergence = math.log(totalDiffRowP2, 5)
+        divergence = math.log(totalDiffRowP2, 2)
         valueP2 -= divergence
         return valueP2
 
@@ -232,20 +227,20 @@ class TeamNameMinimaxAgent(Agent):
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
-        if current_d == max_d:
-            return self.EvaluationFunction(state)
+        # if current_d == max_d:
+        #     return self.EvaluationFunction(state)
         legal_actions.sort(key=self.sortdiff)
         legal_actions = legal_actions[::-1]
 
         if player == 1:
             value = min_num
             for action in legal_actions:
-                if action[0][0] - action[1][0] < -1:
+                if action[0][0] - action[1][0] <= -1:
                     continue
                 if action[0][0] <= 4:
                     continue
                 value = max(value,
-                            self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
+                            self.EvaluationFunction(state))
                 if value >= beta:
                     return value
                 alpha = max(alpha, value)
@@ -253,12 +248,12 @@ class TeamNameMinimaxAgent(Agent):
         else:
             value = max_num
             for action in legal_actions:
-                if action[0][0] - action[1][0] > 1:
+                if action[0][0] - action[1][0] >= 1:
                     continue
                 if action[0][0] >= 16:
                     continue
                 value = min(value,
-                            self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
+                            self.EvaluationFunction(state))
                 if value <= alpha:
                     return value
                 beta = min(beta, value)
@@ -289,27 +284,26 @@ class TeamNameMinimaxAgent(Agent):
         # averOfRowP1 = averOfRowP1 / 10
 
         for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
-            if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
-            else:
-                left = (10 - abs(row - 10)) // 2
-                right = left + 1
-                valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
+            #if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
+            #    left = (10 - abs(row - 10)) // 2 + 1
+            #    valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
+            #else:
+            #    left = (10 - abs(row - 10)) // 2
+            #    right = left + 1
+            #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
             # totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 10
+                    valueP1 -= 100
                 else:
-                    valueP1 -= 4
+                    valueP1 -= 50
             if piece_type == 3 and ([row, column] in target3):
-                valueP1 -= 7
-
+                valueP1 -= 100
+            if piece_type == 1 and ([row,column] in target3):
+                valueP1 += 100
         # divergence = math.log(totalDiffRowP1, 5)
         # valueP1 -= divergence
         return 1000 - valueP1
-
-        pass
 
     ############   收官部分找最大评价分 #######################################
     def maxEnd(self, state, layer):
@@ -362,7 +356,7 @@ class TeamNameMinimaxAgent(Agent):
                     if max_action_value > value:
                         value = max_action_value
                         self.action = action
-                        print("set final successfel.")
+                        # print("set final successfel.")
 
         return
 
@@ -387,16 +381,22 @@ class TeamNameMinimaxAgent(Agent):
             value = 0  # 0 is smallest revenue
             # The Start Part of Game
             if firstrow1 >= firstrow2:
+                start = time.time()
                 self.firstPeriod(state)
-                print("Now State", 1)
+                end = time.time()
+                print("Now State", 1, "Time:", end - start)
             # The Middle Part of Game
             elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
+                start = time.time()
                 self.middlePeriod(state)
-                print("\nNow State", 2)
+                end = time.time()
+                print("Now State", 2, "Time:", end - start)
             # The Ending Part of Game
             elif lastrow1 < lastrow2:
+                start = time.time()
                 self.lastPeriod(state)
-                print("Now State", 3)
+                end = time.time()
+                print("Now State", 3, "Time:", end - start)
             else:
                 print("error in choose state of game.")
 

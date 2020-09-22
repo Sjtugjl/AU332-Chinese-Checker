@@ -31,6 +31,28 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager" selected="Python.runGame">
+    <configuration name="agent" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Homework1_win" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/agent.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="runGame" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Homework1_win" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -78,6 +100,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.runGame" />
+        <item itemvalue="Python.agent" />
         <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
@@ -96,7 +119,7 @@
       <workItem from="1600698717103" duration="1251000" />
       <workItem from="1600754133260" duration="4283000" />
       <workItem from="1600761421492" duration="59000" />
-      <workItem from="1600784664311" duration="331000" />
+      <workItem from="1600784664311" duration="2389000" />
     </task>
     <servers />
   </component>
@@ -104,29 +127,30 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1285" height="253" key="GridCell.Tab.0.bottom" timestamp="1600760048447">
-      <screen x="0" y="0" width="1328" height="956" />
+    <state width="1493" height="199" key="GridCell.Tab.0.bottom" timestamp="1600787014724">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1285" height="253" key="GridCell.Tab.0.bottom/0.0.1328.956@0.0.1328.956" timestamp="1600760048447" />
-    <state width="1493" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1600701227370" />
-    <state width="1285" height="253" key="GridCell.Tab.0.center" timestamp="1600760048447">
-      <screen x="0" y="0" width="1328" height="956" />
+    <state width="1493" height="199" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1600787014724" />
+    <state width="1493" height="199" key="GridCell.Tab.0.center" timestamp="1600787014724">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1285" height="253" key="GridCell.Tab.0.center/0.0.1328.956@0.0.1328.956" timestamp="1600760048447" />
-    <state width="1493" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1600701227370" />
-    <state width="1285" height="253" key="GridCell.Tab.0.left" timestamp="1600760048447">
-      <screen x="0" y="0" width="1328" height="956" />
+    <state width="1493" height="199" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1600787014724" />
+    <state width="1493" height="199" key="GridCell.Tab.0.left" timestamp="1600787014724">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1285" height="253" key="GridCell.Tab.0.left/0.0.1328.956@0.0.1328.956" timestamp="1600760048447" />
-    <state width="1493" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1600701227370" />
-    <state width="1285" height="253" key="GridCell.Tab.0.right" timestamp="1600760048447">
-      <screen x="0" y="0" width="1328" height="956" />
+    <state width="1493" height="199" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1600787014724" />
+    <state width="1493" height="199" key="GridCell.Tab.0.right" timestamp="1600787014724">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1285" height="253" key="GridCell.Tab.0.right/0.0.1328.956@0.0.1328.956" timestamp="1600760048447" />
-    <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1600701227370" />
+    <state width="1493" height="199" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1600787014724" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Homework1_win$runGame.coverage" NAME="runGame Coverage Results" MODIFIED="1600784790650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Homework1_win$runGame.coverage" NAME="runGame Coverage Results" MODIFIED="1600787014713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Homework1_win$agent.coverage" NAME="agent Coverage Results" MODIFIED="1600785856040" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Homework1_win$test.coverage" NAME="test Coverage Results" MODIFIED="1600685611720" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

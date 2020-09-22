@@ -1,6 +1,6 @@
 import random, re, datetime
 import copy
-import math, sys, time
+import math, sys
 
 
 class Agent(object):
@@ -72,20 +72,20 @@ class TeamNameMinimaxAgent(Agent):
         for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
                 #left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 += row #+ 3 * math.log(abs(column - left) + 1, 5)
+                valueP1 += row*row #+ 3 * math.log(abs(column - left) + 1, 5)
             else:
                 #left = (10 - abs(row - 10)) // 2
                 #right = left + 1
-                valueP1 += row #+ 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            totalDiffRowP1 += abs(row - averOfRowP1)
+                valueP1 += row*row #+ 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
+            #totalDiffRowP1 += abs(row - averOfRowP1)
             # if piece_type == 1 and ([row, column] in target1):
             #    valueP1 -= 4
             # if piece_type == 3 and ([row, column] in target3):
             #    valueP1 -= 4
 
-        divergence = math.log(totalDiffRowP1, 2)
-        valueP1 -= divergence
-        return 1000-valueP1
+        #divergence = math.log(totalDiffRowP1, 5)
+        #valueP1 -= divergence
+        return -valueP1
 
     ############   开局部分找最大评价分 #######################################
     def maxStart(self, state, layer):
@@ -119,9 +119,7 @@ class TeamNameMinimaxAgent(Agent):
         player = state[0]
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
-        # print("random choose")
         legal_actions.sort(key=self.sortdiff)
-
         if player == 1:
             if step == 1:
                 self.action = ((16, 1), (15, 1))
@@ -131,20 +129,16 @@ class TeamNameMinimaxAgent(Agent):
                     max_action_value = self.maxStart(self.game.succ(state, action), 2)
                     if max_action_value > value:
                         value = max_action_value
-                        self.action = action
-                        # print("start one set successful.")
-
         return
 
     ############### 中期部分评价函数 #########################################
     def EvaluationFunction(self, state):
-        value = 0
 
         end, winner = state[1].isEnd(100)
         if end:
             if winner == 1:
-                return 1000  # Max revenue
-            return 0  # Min revenue
+                return max_num  # Max revenue
+            return min_num  # Min revenue
 
         posPlayer1 = state[1].getPlayerPiecePositions1(1)
         posPlayer2 = state[1].getPlayerPiecePositions1(2)
@@ -189,11 +183,11 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 3 and ([row, column] in target3):
                 valueP1 -= 7
 
-        divergence = math.log(totalDiffRowP1, 2)
-        valueP1 -= divergence
-        return 1000 - valueP1
+        #divergence = math.log(totalDiffRowP1, 4)
+        #valueP1 -= divergence
+        return -valueP1
 
-    def heuristicP2(self, pos, target2, target4):
+    def heuristicP2(self, pos, target2, target4,base=4):
         valueP2 = 0  # 我们的棋子的hx值
         averOfRowP2 = 0  # 我们棋子行数的平均值
         totalDiffRowP2 = 0  # 我们棋子行数与平均值的差的和
@@ -219,16 +213,14 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 4 and ([row, column] in target4):
                 valueP2 += 7
 
-        divergence = math.log(totalDiffRowP2, 2)
-        valueP2 -= divergence
+        #divergence = math.log(totalDiffRowP2, base)
+        #valueP2 -= divergence
         return valueP2
 
     ############### 中期找最大最小评价分 ######################################
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
-        # if current_d == max_d:
-        #     return self.EvaluationFunction(state)
         legal_actions.sort(key=self.sortdiff)
         legal_actions = legal_actions[::-1]
 
@@ -301,9 +293,19 @@ class TeamNameMinimaxAgent(Agent):
                 valueP1 -= 100
             if piece_type == 1 and ([row,column] in target3):
                 valueP1 += 100
+            if ([row,column] not in target1) and ([row,column] not in target3):
+            #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
+            #    left = (10 - abs(row - 10)) // 2 + 1
+                valueP1 += row # + 3 * math.log(abs(column - left) + 1, 5)
+            # else:
+            #    left = (10 - abs(row - 10)) // 2
+            #    right = left + 1
+            #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) +
+
+
         # divergence = math.log(totalDiffRowP1, 5)
         # valueP1 -= divergence
-        return 1000 - valueP1
+        return -valueP1
 
     ############   收官部分找最大评价分 #######################################
     def maxEnd(self, state, layer):
@@ -320,22 +322,13 @@ class TeamNameMinimaxAgent(Agent):
         p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
         p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
-        if layer == 1:
-            return self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 1:
-            #     return self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 2:
-            #     return self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
-
         if player == 2:
             legal_actions = legal_actions[::-1]
 
         for action in legal_actions:
-            naction = self.maxEnd((player, self.game.succ(state, action)[1]), layer - 1)
+            naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
-                # self.action = action
-                # print("set final act successful.")
         return value
 
     ############### 收官部总函数 ############################################
@@ -347,17 +340,11 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions.sort(key=self.sortdiff)
 
         if player == 1:
-            if step == 1:
-                self.action = ((16, 1), (15, 1))
-            else:
-                value = min_num
-                for action in legal_actions:
-                    max_action_value = self.maxEnd(self.game.succ(state, action), 2)
-                    if max_action_value > value:
-                        value = max_action_value
-                        self.action = action
-                        # print("set final successfel.")
-
+            value = min_num
+            for action in legal_actions:
+                max_action_value = self.maxEnd(self.game.succ(state, action), 2)
+                if max_action_value > value:
+                    value = max_action_value
         return
 
     ############### 总函数 #################################################
@@ -381,22 +368,16 @@ class TeamNameMinimaxAgent(Agent):
             value = 0  # 0 is smallest revenue
             # The Start Part of Game
             if firstrow1 >= firstrow2:
-                start = time.time()
                 self.firstPeriod(state)
-                end = time.time()
-                print("Now State", 1, "Time:", end - start)
+                print("Now State", 1)
             # The Middle Part of Game
             elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
-                start = time.time()
                 self.middlePeriod(state)
-                end = time.time()
-                print("Now State", 2, "Time:", end - start)
+                print("\nNow State", 2)
             # The Ending Part of Game
             elif lastrow1 < lastrow2:
-                start = time.time()
                 self.lastPeriod(state)
-                end = time.time()
-                print("Now State", 3, "Time:", end - start)
+                print("Now State", 3)
             else:
                 print("error in choose state of game.")
 

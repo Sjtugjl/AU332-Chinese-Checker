@@ -237,6 +237,10 @@ class TeamNameMinimaxAgent(Agent):
         if player == 1:
             value = min_num
             for action in legal_actions:
+                if action[0][0] - action[1][0] < -1:
+                    continue
+                if action[0][0] <= 4:
+                    continue
                 value = max(value,
                             self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
                 if value >= beta:
@@ -246,6 +250,10 @@ class TeamNameMinimaxAgent(Agent):
         else:
             value = max_num
             for action in legal_actions:
+                if action[0][0] - action[1][0] > 1:
+                    continue
+                if action[0][0] >= 16:
+                    continue
                 value = min(value,
                             self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
                 if value <= alpha:

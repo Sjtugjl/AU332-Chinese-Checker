@@ -88,7 +88,7 @@ class TeamNameMinimaxAgent(Agent):
         return -valueP1
 
     ############   开局部分找最大评价分 #######################################
-       def maxStart(self, state, layer):
+    def maxStart(self, state, layer):
         value = min_num
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -223,7 +223,7 @@ class TeamNameMinimaxAgent(Agent):
         return valueP2
 
     ############### 中期找最大最小评价分 ######################################
-        def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
+    def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
         # if current_d == max_d:

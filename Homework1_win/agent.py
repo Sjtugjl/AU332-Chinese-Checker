@@ -99,26 +99,18 @@ class TeamNameMinimaxAgent(Agent):
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
 
-        if layer == 1:
-            start = time.time()
-            eval = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            end = time.time()
-            print("eval time :", end - start)
-            return eval
-            # if player == 1:
-            #     return self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            # if player == 2:
-            #     return self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
-
         if player == 2:
             legal_actions = legal_actions[::-1]
-        start = time.time()
+        # start = time.time()
+        # iter = 0
         for action in legal_actions:
-            naction = self.maxStart((player, self.game.succ(state, action)[1]), layer - 1)
+            if action[0][0] - action[1][0] <= -1:
+                continue
+            if action[0][0] <= 4:
+                continue
+            naction = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
-        end = time.time()
-        print("iter time :", end - start)
         return value
 
     ############### 开局部总函数 ############################################
@@ -235,20 +227,20 @@ class TeamNameMinimaxAgent(Agent):
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
-        if current_d == max_d:
-            return self.EvaluationFunction(state)
+        # if current_d == max_d:
+        #     return self.EvaluationFunction(state)
         legal_actions.sort(key=self.sortdiff)
         legal_actions = legal_actions[::-1]
 
         if player == 1:
             value = min_num
             for action in legal_actions:
-                if action[0][0] - action[1][0] < -1:
+                if action[0][0] - action[1][0] <= -1:
                     continue
                 if action[0][0] <= 4:
                     continue
                 value = max(value,
-                            self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
+                            self.EvaluationFunction(state))
                 if value >= beta:
                     return value
                 alpha = max(alpha, value)
@@ -256,12 +248,12 @@ class TeamNameMinimaxAgent(Agent):
         else:
             value = max_num
             for action in legal_actions:
-                if action[0][0] - action[1][0] > 1:
+                if action[0][0] - action[1][0] >= 1:
                     continue
                 if action[0][0] >= 16:
                     continue
                 value = min(value,
-                            self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, current_d + 1, max_d))
+                            self.EvaluationFunction(state))
                 if value <= alpha:
                     return value
                 beta = min(beta, value)

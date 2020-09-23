@@ -119,19 +119,21 @@ class TeamNameMinimaxAgent(Agent):
         global step
         player = state[0]
         legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
+        tmp = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
         if player == 1:
             if step == 1:
-                self.action = ((16, 1), (15, 1))
+                tmp = ((16, 1), (15, 1))
             else:
                 value = min_num
                 for action in legal_actions:
+                    if action[0][0] - action[1][0] <= -1:
+                        continue
                     max_action_value = self.maxStart(self.game.succ(state, action), 2)
                     if max_action_value > value:
                         value = max_action_value
-                        self.action = action
-        return
+                        tmp = action
+        return tmp
 
     ############### 中期部分评价函数 #########################################
     def EvaluationFunction(self, state):
@@ -188,7 +190,6 @@ class TeamNameMinimaxAgent(Agent):
         #divergence = math.log(totalDiffRowP1, 4)
         #valueP1 -= divergence
         return -valueP1
-
     def heuristicP2(self, pos, target2, target4,base=4):
         valueP2 = 0  # 我们的棋子的hx值
         averOfRowP2 = 0  # 我们棋子行数的平均值
@@ -220,6 +221,7 @@ class TeamNameMinimaxAgent(Agent):
         return valueP2
 
     ############### 中期找最大最小评价分 ######################################
+
     def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -260,17 +262,20 @@ class TeamNameMinimaxAgent(Agent):
         player = state[0]
         value = min_num
         legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
+        tmp = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
         for action in legal_actions:
+            if action[0][0] - action[1][0] <= -1:
+                continue
             minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, 1, 2)
             if minimax_action_value > value:
                 value = minimax_action_value
-                self.action = action
+                tmp = action
+        return tmp
 
     ############### 收官部分评价函数值 ########################################
     def lastevaluation(self, pos, target1, target3):
-        valueP1 = 0  # 我们的棋子的hx值
+        valueP1 = 10000  # 我们的棋子的hx值
         # averOfRowP1 = 0  # 我们棋子行数的平均值
         # totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
 
@@ -289,17 +294,17 @@ class TeamNameMinimaxAgent(Agent):
             # totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 100
+                    valueP1 += 100
                 else:
-                    valueP1 -= 50
+                    valueP1 += 50
             if piece_type == 3 and ([row, column] in target3):
-                valueP1 -= 100
+                valueP1 += 100
             # if piece_type == 1 and ([row,column] in target3):
             #     valueP1 += 100
             if ([row,column] not in target1) and ([row,column] not in target3):
             #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
             #    left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 += row # + 3 * math.log(abs(column - left) + 1, 5)
+                valueP1 -= row # + 3 * math.log(abs(column - left) + 1, 5)
             # else:
             #    left = (10 - abs(row - 10)) // 2
             #    right = left + 1
@@ -308,7 +313,7 @@ class TeamNameMinimaxAgent(Agent):
 
         # divergence = math.log(totalDiffRowP1, 5)
         # valueP1 -= divergence
-        return -valueP1
+        return valueP1
 
     ############   收官部分找最大评价分 #######################################
     def maxEnd(self, state, layer):
@@ -336,7 +341,6 @@ class TeamNameMinimaxAgent(Agent):
             naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
-        print("value", value, "action", action)
         return value
 
     ############### 收官部总函数 ############################################
@@ -344,18 +348,70 @@ class TeamNameMinimaxAgent(Agent):
         global step
         player = state[0]
         legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
+        tmp = random.choice(legal_actions)
+        print("randoned,", tmp)
         legal_actions.sort(key=self.sortdiff)
 
         if player == 1:
             value = min_num
             for action in legal_actions:
+                if action[0][0] - action[1][0] <= -1:
+                    continue
                 max_action_value = self.maxEnd(self.game.succ(state, action), 2)
                 if max_action_value > value:
+
                     value = max_action_value
-                    self.action = action
-                    print("Success")
-        return
+                    tmp = action
+
+        return tmp
+#####   zan shi mei yong ! ###
+    def finalruns(self, state, player):
+        condPlay1 = []
+        board = state[1]
+        pos = board.getPlayerPiecePositions1(player)
+        idx = -1
+        if player == 1:
+            for i in range(len(condPlay1)):
+                if condPlay1[i] == pos:
+                    idx = i
+                    break
+            if idx == 0:
+                self.action = ((4, 2), (4, 4))
+            elif idx == 1:
+                self.action = ((4, 1), (4, 3))
+            elif idx == 2:
+                self.action = ((4, 1), (4, 2))
+            elif idx == 3:
+                self.action = ((4, 3), (4, 1))
+            elif idx == 4:
+                self.action = ((4, 4), (4, 2))
+            elif idx == 5:
+                self.action = ((4, 4), (4, 3))
+            elif idx == 6:
+                self.action = ((4, 2), (4, 4))
+            elif idx == 7:
+                self.action = ((4, 2), (4, 3))
+            elif idx == 8:
+                self.action = ((4, 3), (4, 1))
+            elif idx == 9:
+                self.action = ((4, 3), (4, 2))
+            elif idx == 10:
+                self.action = ((4, 2), (4, 1))
+            elif idx == 11:
+                self.action = ((4, 3), (4, 4))
+        return (idx + 1)
+ #####   zan shi mei yong ! ###
+    def lastPeriod2(self, state):
+        global step
+        player = state[0]
+        legal_actions = self.game.actions(state)
+        self.action = random.choice(legal_actions)
+        legal_actions.sort(key=self.sortdiff)
+
+        gameEnded = self.finalruns(state, player)
+
+        if not gameEnded:
+            self.lastPeriod(state)
 
     ############### 总函数 #################################################
     def getAction(self, state):
@@ -378,22 +434,24 @@ class TeamNameMinimaxAgent(Agent):
             value = 0  # 0 is smallest revenue
             # The Start Part of Game
             if firstrow1 >= firstrow2:
-                self.firstPeriod(state)
-                print("Now State", 1)
+                tmp = self.firstPeriod(state)
+                self.action = tmp
+                print("Now State", 1, "action:", self.action)
             # The Middle Part of Game
             elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
-                self.middlePeriod(state)
-                print("\nNow State", 2)
+                tmp = self.middlePeriod(state)
+                self.action = tmp
+                print("\nNow State", 2, 'action', self.action)
             # The Ending Part of Game
             elif lastrow1 < lastrow2:
-                self.lastPeriod(state)
-                print("\nNow State", 3)
+                tmp = self.lastPeriod(state)
+                self.action = tmp
+                print("\nNow State", 3, 'action', self.action)
             else:
                 print("error in choose state of game.")
 
         # else:  # Play As Player 2
-
-        print("Now step:", step)
+        print("Now step:", step, "Want Run", self.action)
 
 
 step = 0

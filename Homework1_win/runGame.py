@@ -30,9 +30,12 @@ def runGame(ccgame, agents):
         if player == 2:
             print("P2's Time is :", time2 - time1)
         legal_actions = ccgame.actions(state)
+
         if agent.action not in legal_actions:
             agent.action = random.choice(legal_actions)
+        print("Sys Run Action", agent.action)
         state = ccgame.succ(state, agent.action)
+
     board.board = state[1]
     board.draw()
     board.update_idletasks()

@@ -129,6 +129,7 @@ class TeamNameMinimaxAgent(Agent):
                     max_action_value = self.maxStart(self.game.succ(state, action), 2)
                     if max_action_value > value:
                         value = max_action_value
+                        self.action = action
         return
 
     ############### 中期部分评价函数 #########################################
@@ -290,9 +291,11 @@ class TeamNameMinimaxAgent(Agent):
                 else:
                     valueP1 -= 50
             if piece_type == 3 and ([row, column] in target3):
-                valueP1 -= 10000
+                valueP1 -= 1000
             #if piece_type == 1 and ([row,column] in target3):
             #    valueP1 += 100
+            # if piece_type == 1 and ([row,column] in target3):
+            #     valueP1 += 100
             if ([row,column] not in target1) and ([row,column] not in target3):
             #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
             #    left = (10 - abs(row - 10)) // 2 + 1
@@ -345,6 +348,8 @@ class TeamNameMinimaxAgent(Agent):
                 max_action_value = self.maxEnd(self.game.succ(state, action), 2)
                 if max_action_value > value:
                     value = max_action_value
+                    self.action = action
+                    print("Success")
         return
 
     ############### 总函数 #################################################
@@ -377,7 +382,7 @@ class TeamNameMinimaxAgent(Agent):
             # The Ending Part of Game
             elif lastrow1 < lastrow2:
                 self.lastPeriod(state)
-                print("Now State", 3)
+                print("\nNow State", 3)
             else:
                 print("error in choose state of game.")
 

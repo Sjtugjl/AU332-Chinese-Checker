@@ -1,4 +1,5 @@
 from agent import *
+import agent as ag
 from game import ChineseChecker
 import datetime
 import tkinter as tk
@@ -23,7 +24,7 @@ def timeout(func, param, timeout_duration=500, default=None):
         result = func(param)
         endTime = time.time()
         runTime = endTime - startTime
-        print("TIme: ", runTime, "Player", param[0])
+        print("Time: ", runTime, "Player", param[0])
     except TimeoutError as exc:
         result = default
         print("You are timeout!")  ####!
@@ -51,6 +52,7 @@ def runGame(ccgame, agents):
         legal_actions = ccgame.actions(state)
         if agent.action not in legal_actions:
             agent.action = random.choice(legal_actions)
+        print("Sys Run Action", agent.action)
         state = ccgame.succ(state, agent.action)
     board.board = state[1]
     board.draw()
@@ -67,11 +69,13 @@ def runGame(ccgame, agents):
 
 
 def simulateMultipleGames(agents_dict, simulation_times, ccgame):
+    steplist = []
     win_times_P1 = 0
     win_times_P2 = 0
     tie_times = 0
     utility_sum = 0
     for i in range(simulation_times):
+        ag.step = 0
         run_result = runGame(ccgame, agents_dict)
         print(run_result)
         if run_result == 1:
@@ -80,11 +84,12 @@ def simulateMultipleGames(agents_dict, simulation_times, ccgame):
             win_times_P2 += 1
         elif run_result == 0:
             tie_times += 1
-        print('game', i + 1, 'finished', 'winner is player ', run_result)
+        print('game', i + 1, 'finished', 'winner is player ', run_result,'\t total', ag.step,'step used')
     print('In', simulation_times, 'simulations:')
     print('winning times: for player 1 is ', win_times_P1)
     print('winning times: for player 2 is ', win_times_P2)
     print('Tie times:', tie_times)
+    print('Step list', steplist)
 
 def callback(ccgame):
     B.destroy()

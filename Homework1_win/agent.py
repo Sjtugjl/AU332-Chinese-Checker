@@ -120,6 +120,7 @@ class TeamNameMinimaxAgent(Agent):
         player = state[0]
         legal_actions = self.game.actions(state)
         tmp = random.choice(legal_actions)
+        rdm =  tmp
         legal_actions.sort(key=self.sortdiff)
         if player == 1:
             if step == 1:
@@ -133,6 +134,8 @@ class TeamNameMinimaxAgent(Agent):
                     if max_action_value > value:
                         value = max_action_value
                         tmp = action
+        if rdm == tmp:
+            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     ############### 中期部分评价函数 #########################################
@@ -263,6 +266,7 @@ class TeamNameMinimaxAgent(Agent):
         value = min_num
         legal_actions = self.game.actions(state)
         tmp = random.choice(legal_actions)
+        rdm = tmp
         legal_actions.sort(key=self.sortdiff)
         for action in legal_actions:
             if action[0][0] - action[1][0] <= -1:
@@ -271,6 +275,8 @@ class TeamNameMinimaxAgent(Agent):
             if minimax_action_value > value:
                 value = minimax_action_value
                 tmp = action
+        if rdm == tmp:
+            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     ############### 收官部分评价函数值 ########################################
@@ -306,7 +312,7 @@ class TeamNameMinimaxAgent(Agent):
             #    left = (10 - abs(row - 10)) // 2 + 1
                 valueP1 -= row # + 3 * math.log(abs(column - left) + 1, 5)
             # else:
-            #    left = (10 - abs(row - 10)) // 2
+            #    left =  (10 - abs(row - 10)) // 2
             #    right = left + 1
             #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) +
 
@@ -349,7 +355,7 @@ class TeamNameMinimaxAgent(Agent):
         player = state[0]
         legal_actions = self.game.actions(state)
         tmp = random.choice(legal_actions)
-        print("randoned,", tmp)
+        rdm = tmp
         legal_actions.sort(key=self.sortdiff)
 
         if player == 1:
@@ -362,7 +368,8 @@ class TeamNameMinimaxAgent(Agent):
 
                     value = max_action_value
                     tmp = action
-
+        if rdm == tmp:
+            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     def finalruns(self, state, player):
@@ -448,7 +455,7 @@ class TeamNameMinimaxAgent(Agent):
                 self.action = tmp
                 print("\nNow State", 3, 'action', self.action)
             else:
-                print("error in choose state of game.")
+                print('\033[1;30;41m' + 'error in choose state of game.' + '\033[0m')
 
         # else:  # Play As Player 2
         print("Now step:", step, "Want Run", self.action)

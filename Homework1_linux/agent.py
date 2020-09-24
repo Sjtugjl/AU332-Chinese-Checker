@@ -284,6 +284,11 @@ class TeamNameMinimaxAgent(Agent):
     ############### 收官部分评价函数值 ########################################
     def lastevaluation(self, pos, target1, target3):
         valueP1 = 10000  # 我们的棋子的hx值
+        positionScore = 0 #The basic score based on the sum of rows of my our pieces
+        targetScore = [0,0]#The bonus or penalty of a going to a target,
+        #The first elements is the score of a bonus or penalty
+        #The seconde element is the type of this bonus or penalty
+        #In other words,it explains why this bonus or penalty is given
         # averOfRowP1 = 0  # 我们棋子行数的平均值
         # totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
 
@@ -302,30 +307,35 @@ class TeamNameMinimaxAgent(Agent):
             # totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 += 1000
+                    targetScore[0] += 1000
+                    targetScore[1] = 1
                 else:
-                    valueP1 += 50*row
+                    targetScore[0] += 50
+                    targetScore[1] = 2
             if piece_type == 3 and ([row, column] in target3):
-                valueP1 += 1000
+                targetScore[0] += 1000
+                targetScore[1] = 3
             #if piece_type == 1 and ([row,column] in target3):
 
             if piece_type == 1 and ([row,column] in target3):
-                 valueP1 -= 100
+                targetScore[0] -= 100
+                targetScore[1] = 4
             if piece_type == 3 and row==1 and column ==1:
-                valueP1 = min_num
+                targetScore[0] = min_num
+                targetScore[1] = 5
             if ([row,column] not in target1) and ([row,column] not in target3):
             #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
             #    left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 -= row # + 3 * math.log(abs(column - left) + 1, 5)
+                positionScore += row # + 3 * math.log(abs(column - left) + 1, 5)
             # else:
             #    left = (10 - abs(row - 10)) // 2
             #    right = left + 1
             #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) +
 
-
+        valueP1 = valueP1 - positionScore + targetScore[0]
         # divergence = math.log(totalDiffRowP1, 5)
         # valueP1 -= divergence
-        return valueP1
+        return valueP1,positionScore,targetScore
 
     ############   收官部分找最大评价分 #######################################
     def maxEnd(self, state, layer):
@@ -334,12 +344,11 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
+        positionScore = 0
+        targetScore = []
 
-        posPlayer1 = state[1].getPlayerPiecePositions1(1)
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
-        #p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
-        #p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
         if player == 2:
             legal_actions = legal_actions[::-1]
@@ -349,10 +358,10 @@ class TeamNameMinimaxAgent(Agent):
             #    continue
             succor = self.game.succ(state, action)
             posPlayer1 = succor[1].getPlayerPiecePositions1(1)
-            naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
+            naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
             if value < naction:
                 value = naction
-        return value
+        return value,positionScore,targetScore
 
     ############### 收官部总函数 ############################################
     def lastPeriod(self, state):
@@ -368,8 +377,10 @@ class TeamNameMinimaxAgent(Agent):
             for action in legal_actions:
                 #if action[0][0] - action[1][0] <= -1:
                 #    continue
-                max_action_value = self.maxEnd(self.game.succ(state, action), 2)
+                max_action_value,positionScore,targetScore= self.maxEnd(self.game.succ(state, action), 2)
                 print("action:", action,",value:",max_action_value)
+                print("basic score:",positionScore)
+                print("target score:",targetScore)
                 if max_action_value > value:
                     value = max_action_value
                     tmp = action
@@ -458,7 +469,7 @@ class TeamNameMinimaxAgent(Agent):
             elif lastrow1 < lastrow2:
                 tmp = self.lastPeriod(state)
                 self.action = tmp
-                print("\nNow State", 3, 'action', self.action)
+                print("\nNow State", 3, 'Final Action', self.action)
             else:
                 print('\033[1;30;41m' + 'error in choose state of game.' + '\033[0m')
 

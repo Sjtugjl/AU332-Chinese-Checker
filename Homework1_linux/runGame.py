@@ -99,7 +99,7 @@ def callback(ccgame):
     randomAgent = RandomAgent(ccgame)
     teamAgent = TeamNameMinimaxAgent(ccgame)
     # simulateMultipleGames({1: simpleGreedyAgent1, 2: simpleGreedyAgent}, 10, ccgame)
-    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 10, ccgame)
+    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
 
    
 

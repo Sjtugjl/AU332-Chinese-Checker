@@ -184,11 +184,13 @@ class TeamNameMinimaxAgent(Agent):
             totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 7
+                    valueP1 -= 20
                 else:
-                    valueP1 -= 4
+                    valueP1 -= 4*row
             if piece_type == 3 and ([row, column] in target3):
                 valueP1 -= 7
+            if piece_type == 3 and row == 1 and column == 1:
+                valueP1 = max_num
 
         #divergence = math.log(totalDiffRowP1, 4)
         #valueP1 -= divergence
@@ -300,17 +302,17 @@ class TeamNameMinimaxAgent(Agent):
             # totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 += 100
+                    valueP1 += 1000
                 else:
-                    valueP1 += 50
+                    valueP1 += 50*row
             if piece_type == 3 and ([row, column] in target3):
-                valueP1 += 100
+                valueP1 += 1000
             #if piece_type == 1 and ([row,column] in target3):
 
             if piece_type == 1 and ([row,column] in target3):
                  valueP1 -= 100
-            if piece_type == 3 and ([row,column] in target1):
-                valueP1 -= 50
+            if piece_type == 3 and row==1 and column ==1:
+                valueP1 = min_num
             if ([row,column] not in target1) and ([row,column] not in target3):
             #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
             #    left = (10 - abs(row - 10)) // 2 + 1
@@ -343,8 +345,8 @@ class TeamNameMinimaxAgent(Agent):
             legal_actions = legal_actions[::-1]
 
         for action in legal_actions:
-            if action[0][0] - action[1][0] <= -1:
-                continue
+            #if action[0][0] - action[1][0] <= -1:
+            #    continue
             succor = self.game.succ(state, action)
             posPlayer1 = succor[1].getPlayerPiecePositions1(1)
             naction = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
@@ -364,11 +366,11 @@ class TeamNameMinimaxAgent(Agent):
         if player == 1:
             value = min_num
             for action in legal_actions:
-                if action[0][0] - action[1][0] <= -1:
-                    continue
+                #if action[0][0] - action[1][0] <= -1:
+                #    continue
                 max_action_value = self.maxEnd(self.game.succ(state, action), 2)
+                print("action:", action,",value:",max_action_value)
                 if max_action_value > value:
-
                     value = max_action_value
                     tmp = action
         if rdm == tmp:

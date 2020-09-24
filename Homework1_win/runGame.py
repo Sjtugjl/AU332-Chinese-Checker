@@ -84,7 +84,7 @@ def callback(ccgame):
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
     teamAgent = TeamNameMinimaxAgent(ccgame)
-    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
+    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 50, ccgame)
 
 
 if __name__ == '__main__':

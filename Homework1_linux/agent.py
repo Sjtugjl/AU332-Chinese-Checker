@@ -383,8 +383,8 @@ class TeamNameMinimaxAgent(Agent):
         return valueP1,positionScore,targetScore
 
     ############   收官部分找最大评价分 #######################################
-    def maxEnd(self, state, layer):
-        global preaction
+    def maxEnd(self, state, paction):
+        global preaction, step
         value = min_num
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
@@ -399,28 +399,32 @@ class TeamNameMinimaxAgent(Agent):
         if player == 2:
             legal_actions = legal_actions[::-1]
 
-        for action in legal_actions:
-            if action[0][0] - action[1][0] <= -1:
-                continue
-            if action == preaction:
-                continue
-            if action == preaction[::-1]:
-                continue
-            board = copy.deepcopy(state[1])
-            board.board_status[action[1]] = board.board_status[action[0]]
-            board.board_status[action[0]] = 0
-            next_state = (player, board)
-            posPlayer1 = next_state[1].getPlayerPiecePositions1(1)
-            # print("PosP1", posPlayer1)
-            naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            if value < naction:
-                value = naction
+        if state[1].isEnd(step)[0]:
+            print("Winning", legal_actions)
+            value = max_num
+        else:
+            for action in legal_actions:
+                if action[0][0] - action[1][0] <= -1:
+                    continue
+                if action == preaction:
+                    continue
+                if action == preaction[::-1]:
+                    continue
+                board = copy.deepcopy(state[1])
+                board.board_status[action[1]] = board.board_status[action[0]]
+                board.board_status[action[0]] = 0
+                next_state = (player, board)
+                posPlayer1 = next_state[1].getPlayerPiecePositions1(1)
+                # print("PosP1", posPlayer1)
+                naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
+                if value < naction:
+                    value = naction
         return value,positionScore,targetScore
 
     ############### 收官部总函数 ############################################
     def lastPeriod(self, state):
         global preaction
-        print("preaction", preaction)
+        # print("preaction", preaction)
         global step
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -437,10 +441,10 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                max_action_value,positionScore,targetScore= self.maxEnd(next_state, 2)
-                print("action:", action,",value:",max_action_value)
-                print("basic score:",positionScore)
-                print("target score:",targetScore)
+                max_action_value,positionScore,targetScore= self.maxEnd(next_state, action)
+                # print("action:", action,",value:",max_action_value)
+                # print("basic score:",positionScore)
+                # print("target score:",targetScore)
                 if max_action_value > value:
                     value = max_action_value
                     bestList.append(action)

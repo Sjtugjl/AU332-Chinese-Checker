@@ -250,7 +250,7 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 3 and row == 1 and column == 1:
                 valueP1 = 100000
 
-        if lastRow - firstRow >8:
+        if lastRow - firstRow >7:
             divergence = 5
 
         valueP1 += divergence
@@ -490,7 +490,10 @@ class TeamNameMinimaxAgent(Agent):
                 print("basic score:",positionScore)
                 print("target score:",targetScore)
                 if max_action_value > value:
+                    bestList = []
+                    bestList.append(action)
                     value = max_action_value
+                elif max_action_value == value:
                     bestList.append(action)
             tmp = random.choice(bestList)
             print("bestlist", bestList)

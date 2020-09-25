@@ -242,7 +242,7 @@ class TeamNameMinimaxAgent(Agent):
             #totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 10
+                    valueP1 -= 20
                 else:
                     valueP1 -= 4*row
             if piece_type == 3 and ([row, column] in target3):
@@ -251,7 +251,7 @@ class TeamNameMinimaxAgent(Agent):
                 valueP1 = 100000
 
         if lastRow - firstRow >8:
-            divergence = 9
+            divergence = 5
 
         valueP1 += divergence
 
@@ -367,7 +367,7 @@ class TeamNameMinimaxAgent(Agent):
     def lastevaluation(self, pos, target1, target3):
         valueP1 = 10000  # 我们的棋子的hx值
         positionScore = 0 #The basic score based on the sum of rows of my our pieces
-        targetScore = [0]#The bonus or penalty of a going to a target,
+        targetScore = [0,0]#The bonus or penalty of a going to a target,
         #The first elements is the score of a bonus or penalty
         #The seconde element is the type of this bonus or penalty
         #In other words,it explains why this bonus or penalty is given
@@ -390,21 +390,21 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
                     targetScore[0] += 1000
-                    targetScore.append([row,column,"Blue in Peak"])
+                    targetScore[1] = 1
                 else:
                     targetScore[0] += 50
-                    targetScore.append([row,column,"Blue in Blue"])
+                    targetScore[1] = 2
             if piece_type == 3 and ([row, column] in target3):
                 targetScore[0] += 1000
-                targetScore.append([row,column,"Yellow in Yellow"])
+                targetScore[1] = 3
             #if piece_type == 1 and ([row,column] in target3):
 
             if piece_type == 1 and ([row,column] in target3):
                 targetScore[0] -= 100
-                targetScore.append([row,column,"Blue in Yellow"])
+                targetScore[1] = 4
             if piece_type == 3 and row==1 and column ==1:
                 targetScore[0] -= 100000
-                targetScore.append([row,column,"Yellow in Blue"])
+                targetScore[1] = 5
             if ([row,column] not in target1) and ([row,column] not in target3):
             #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
             #    left = (10 - abs(row - 10)) // 2 + 1
@@ -426,6 +426,8 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
+        bestpositionScore = None
+        besttargetScore = None
         positionScore = 0
         targetScore = []
         player = state[0]
@@ -435,7 +437,7 @@ class TeamNameMinimaxAgent(Agent):
 
         if player == 2:
             legal_actions = legal_actions[::-1]
-            legal_actions  = legal_actions[:14]
+            legal_actions  = legal_actions[:40]
 
         if state[1].isEnd(step)[0]:
            #print("Winning", legal_actions)
@@ -459,7 +461,9 @@ class TeamNameMinimaxAgent(Agent):
                 naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
                 if value < naction:
                     value = naction
-        return value,positionScore,targetScore
+                    bestpositionScore  = positionScore
+                    besttargetScore = targetScore
+        return value,bestpositionScore,besttargetScore
 
     ############### 收官部总函数 ############################################
     def lastPeriod(self, state): # P1 ok, P2 no OK
@@ -482,9 +486,9 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
                 max_action_value,positionScore,targetScore= self.maxEnd(next_state, action)
-                print("action:", action,",value:",max_action_value)
-                print("basic score:",positionScore)
-                print("target score:",targetScore)
+                # print("action:", action,",value:",max_action_value)
+                # print("basic score:",positionScore)
+                # print("target score:",targetScore)
                 if max_action_value > value:
                     value = max_action_value
                     bestList.append(action)

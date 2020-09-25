@@ -426,6 +426,8 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
+        bestpositionScore = None
+        besttargetScore = None
         positionScore = 0
         targetScore = []
         player = state[0]
@@ -435,7 +437,7 @@ class TeamNameMinimaxAgent(Agent):
 
         if player == 2:
             legal_actions = legal_actions[::-1]
-            legal_actions  = legal_actions[:14]
+            legal_actions  = legal_actions[:40]
 
         if state[1].isEnd(step)[0]:
            #print("Winning", legal_actions)
@@ -459,7 +461,9 @@ class TeamNameMinimaxAgent(Agent):
                 naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
                 if value < naction:
                     value = naction
-        return value,positionScore,targetScore
+                    bestpositionScore  = positionScore
+                    besttargetScore = targetScore
+        return value,bestpositionScore,besttargetScore
 
     ############### 收官部总函数 ############################################
     def lastPeriod(self, state): # P1 ok, P2 no OK

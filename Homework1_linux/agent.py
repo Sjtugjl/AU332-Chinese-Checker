@@ -325,7 +325,7 @@ class TeamNameMinimaxAgent(Agent):
                 beta = min(beta, value)
             return value
 
-    ############### 中期总函数 ##############################################
+    ############### 中期总函 d数 ##############################################
     def middlePeriod(self, state):
         global step, preaction
         player = state[0]

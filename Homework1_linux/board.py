@@ -107,12 +107,14 @@ class Board(object):
         return result1 + result2
 
     def getPlayerPiecePositions1(self, player):
-        # return a list of positions that player's pieces occupy
-        result1 = [(row, col,self.board_status[(row, col)]) for row in range(1, self.size + 1) for col in range(1, self.getColNum(row) + 1) \
-                   if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
-        result2 = [(row, col,self.board_status[(row, col)]) for row in range(self.size + 1, self.size * 2) for col in
-                   range(1, self.getColNum(row) + 1) \
-                   if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
+
+    # return a list of positions that player's pieces occupy
+        result1 = [(row, col, self.board_status[(row, col)]) for row in range(1, self.size + 1) for col in
+               range(1, self.getColNum(row) + 1) \
+               if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
+        result2 = [(row, col, self.board_status[(row, col)]) for row in range(self.size + 1, self.size * 2) for col in
+               range(1, self.getColNum(row) + 1) \
+               if self.board_status[(row, col)] == player or self.board_status[(row, col)] == player + 2]
         return result1 + result2
 
     def getOneDirectionHopPosition(self, pos, dir_func):
@@ -171,7 +173,7 @@ class Board(object):
                         continue
                     elif self.board_status[(row, col)] == 1:
                         continue
-                    elif iter > 100 and self.board_status[(row, col)] == 2:
+                    elif iter > 100 and (self.board_status[(row, col)] == 2 or self.board_status[(row, col)] == 4):
                         return True
                     else:
                         return False
@@ -185,7 +187,7 @@ class Board(object):
                         continue
                     elif self.board_status[(row, col)] == 2:
                         continue
-                    elif iter > 100 and self.board_status[(row, col)] == 1:
+                    elif iter > 100 and (self.board_status[(row, col)] == 1 or self.board_status[(row, col)] == 3):
                         return True
                     else:
                         return False

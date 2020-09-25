@@ -62,29 +62,39 @@ class TeamNameMinimaxAgent(Agent):
     ############### 开局部分评价函数值 ########################################
     def startevaluation(self, pos, target1, target3):  # 开局部分的评价函数
         valueP1 = 0  # 我们的棋子的hx值
-        averOfRowP1 = 0  # 我们棋子行数的平均值
-        totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+        divergence = 0
+        #averOfRowP1 = 0  # 我们棋子行数的平均值
+        #totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+        firstRow = 19
+        lastRow = 0
 
-        for onePiece in pos:
-           averOfRowP1 += onePiece[0]
-        averOfRowP1 = averOfRowP1 / 10
+        #for onePiece in pos:
+        #   averOfRowP1 += onePiece[0]
+        #averOfRowP1 = averOfRowP1 / 10
 
-        for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
+        for row, column, piece_type in pos:# valueP1越小，p1越接近胜利
+            if row < firstRow:
+                firstRow = row
+            if row > lastRow:
+                lastRow = row
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                #left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 += row*row #+ 3 * math.log(abs(column - left) + 1, 5)
+                left = (10 - abs(row - 10)) // 2 + 1
+                valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
             else:
-                #left = (10 - abs(row - 10)) // 2
-                #right = left + 1
-                valueP1 += row*row #+ 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
+                left = (10 - abs(row - 10)) // 2
+                right = left + 1
+                valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
             #totalDiffRowP1 += abs(row - averOfRowP1)
             # if piece_type == 1 and ([row, column] in target1):
             #    valueP1 -= 4
             # if piece_type == 3 and ([row, column] in target3):
             #    valueP1 -= 4
 
-        #divergence = math.log(totalDiffRowP1, 5)
-        #valueP1 -= divergence
+        if lastRow - firstRow > 9:
+            divergence = 5
+
+        valueP1 += divergence
+
         return -valueP1
 
     ############   开局部分找最大评价分 #######################################
@@ -130,7 +140,7 @@ class TeamNameMinimaxAgent(Agent):
         legal_actions.sort(key=self.sortdiff)
         if player == 1:
             if step == 1:
-                tmp = ((16, 1), (15, 1))
+                tmp = ((16, 1), (15, 2))
             else:
                 value = min_num
                 bestValue = min_num
@@ -204,14 +214,21 @@ class TeamNameMinimaxAgent(Agent):
 
     def heuristicP1(self, pos, target1, target3):  # target1:p1Type1Target
         valueP1 = 0  # 我们的棋子的hx值
-        averOfRowP1 = 0  # 我们棋子行数的平均值
-        totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+        #averOfRowP1 = 0  # 我们棋子行数的平均值
+        #totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
+        firstRow = 19
+        lastRow = 0
+        divergence = 0
 
-        for onePiece in pos:
-            averOfRowP1 += onePiece[0]
-        averOfRowP1 = averOfRowP1 / 10
+        #for onePiece in pos:
+        #    averOfRowP1 += onePiece[0]
+        #averOfRowP1 = averOfRowP1 / 10
 
         for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
+            if row < firstRow:
+                firstRow = row
+            if row > lastRow:
+                lastRow = row
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
                 left = (10 - abs(row - 10)) // 2 + 1
                 valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
@@ -219,7 +236,7 @@ class TeamNameMinimaxAgent(Agent):
                 left = (10 - abs(row - 10)) // 2
                 right = left + 1
                 valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            totalDiffRowP1 += abs(row - averOfRowP1)
+            #totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
                     valueP1 -= 20
@@ -230,9 +247,16 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 3 and row == 1 and column == 1:
                 valueP1 = 100000
 
+        if lastRow - firstRow >8:
+            divergence = 5
+
+        valueP1 += divergence
+
         #divergence = math.log(totalDiffRowP1, 4)
         #valueP1 -= divergence
         return -valueP1
+
+
     def heuristicP2(self, pos, target2, target4,base=4):
         valueP2 = 0  # 我们的棋子的hx值
         averOfRowP2 = 0  # 我们棋子行数的平均值

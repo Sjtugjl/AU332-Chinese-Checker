@@ -242,7 +242,7 @@ class TeamNameMinimaxAgent(Agent):
             #totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 20
+                    valueP1 -= 12
                 else:
                     valueP1 -= 4*row
             if piece_type == 3 and ([row, column] in target3):
@@ -250,8 +250,8 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 3 and row == 1 and column == 1:
                 valueP1 = 100000
 
-        if lastRow - firstRow >8:
-            divergence = 5
+        if lastRow - firstRow >7:
+            divergence = 9
 
         valueP1 += divergence
 
@@ -367,7 +367,7 @@ class TeamNameMinimaxAgent(Agent):
     def lastevaluation(self, pos, target1, target3):
         valueP1 = 10000  # 我们的棋子的hx值
         positionScore = 0 #The basic score based on the sum of rows of my our pieces
-        targetScore = [0,0]#The bonus or penalty of a going to a target,
+        targetScore = [0]#The bonus or penalty of a going to a target,
         #The first elements is the score of a bonus or penalty
         #The seconde element is the type of this bonus or penalty
         #In other words,it explains why this bonus or penalty is given
@@ -390,21 +390,21 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
                     targetScore[0] += 1000
-                    targetScore[1] = 1
+                    targetScore.append([row,column,"Blue in Peak"])
                 else:
                     targetScore[0] += 50
-                    targetScore[1] = 2
+                    targetScore.append([row,column,"Blue in BLue"])
             if piece_type == 3 and ([row, column] in target3):
                 targetScore[0] += 1000
-                targetScore[1] = 3
+                targetScore.append([row,column,"Yellow in Yellow"])
             #if piece_type == 1 and ([row,column] in target3):
 
             if piece_type == 1 and ([row,column] in target3):
                 targetScore[0] -= 100
-                targetScore[1] = 4
+                targetScore.append([row,column,"Blue in Yellow"])
             if piece_type == 3 and row==1 and column ==1:
                 targetScore[0] -= 100000
-                targetScore[1] = 5
+                targetScore.append([row,column,"Yellow in Peak"])
             if ([row,column] not in target1) and ([row,column] not in target3):
             #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
             #    left = (10 - abs(row - 10)) // 2 + 1
@@ -486,11 +486,14 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
                 max_action_value,positionScore,targetScore= self.maxEnd(next_state, action)
-                # print("action:", action,",value:",max_action_value)
-                # print("basic score:",positionScore)
-                # print("target score:",targetScore)
+                print("action:", action,",value:",max_action_value)
+                print("basic score:",positionScore)
+                print("target score:",targetScore)
                 if max_action_value > value:
+                    bestList = []
+                    bestList.append(action)
                     value = max_action_value
+                elif max_action_value == value:
                     bestList.append(action)
             tmp = random.choice(bestList)
             print("bestlist", bestList)
@@ -499,54 +502,6 @@ class TeamNameMinimaxAgent(Agent):
      #   if rdm == tmp:
      #       print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
-
-    def finalruns(self, state, player):
-        condPlay1 = []
-        board = state[1]
-        pos = board.getPlayerPiecePositions1(player)
-        idx = -1
-        if player == 1:
-            for i in range(len(condPlay1)):
-                if condPlay1[i] == pos:
-                    idx = i
-                    break
-            if idx == 0:
-                self.action = ((4, 2), (4, 4))
-            elif idx == 1:
-                self.action = ((4, 1), (4, 3))
-            elif idx == 2:
-                self.action = ((4, 1), (4, 2))
-            elif idx == 3:
-                self.action = ((4, 3), (4, 1))
-            elif idx == 4:
-                self.action = ((4, 4), (4, 2))
-            elif idx == 5:
-                self.action = ((4, 4), (4, 3))
-            elif idx == 6:
-                self.action = ((4, 2), (4, 4))
-            elif idx == 7:
-                self.action = ((4, 2), (4, 3))
-            elif idx == 8:
-                self.action = ((4, 3), (4, 1))
-            elif idx == 9:
-                self.action = ((4, 3), (4, 2))
-            elif idx == 10:
-                self.action = ((4, 2), (4, 1))
-            elif idx == 11:
-                self.action = ((4, 3), (4, 4))
-        return (idx + 1)
-
-    def lastPeriod2(self, state):
-        global step
-        player = state[0]
-        legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
-        legal_actions.sort(key=self.sortdiff)
-
-        gameEnded = self.finalruns(state, player)
-
-        if not gameEnded:
-            self.lastPeriod(state)
 
     ############### 总函数 #################################################
     def getAction(self, state):

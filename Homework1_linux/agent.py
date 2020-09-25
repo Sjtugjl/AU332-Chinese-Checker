@@ -242,7 +242,7 @@ class TeamNameMinimaxAgent(Agent):
             #totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 20
+                    valueP1 -= 12
                 else:
                     valueP1 -= 4*row
             if piece_type == 3 and ([row, column] in target3):
@@ -251,7 +251,7 @@ class TeamNameMinimaxAgent(Agent):
                 valueP1 = 100000
 
         if lastRow - firstRow >7:
-            divergence = 5
+            divergence = 9
 
         valueP1 += divergence
 
@@ -502,54 +502,6 @@ class TeamNameMinimaxAgent(Agent):
      #   if rdm == tmp:
      #       print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
-
-    def finalruns(self, state, player):
-        condPlay1 = []
-        board = state[1]
-        pos = board.getPlayerPiecePositions1(player)
-        idx = -1
-        if player == 1:
-            for i in range(len(condPlay1)):
-                if condPlay1[i] == pos:
-                    idx = i
-                    break
-            if idx == 0:
-                self.action = ((4, 2), (4, 4))
-            elif idx == 1:
-                self.action = ((4, 1), (4, 3))
-            elif idx == 2:
-                self.action = ((4, 1), (4, 2))
-            elif idx == 3:
-                self.action = ((4, 3), (4, 1))
-            elif idx == 4:
-                self.action = ((4, 4), (4, 2))
-            elif idx == 5:
-                self.action = ((4, 4), (4, 3))
-            elif idx == 6:
-                self.action = ((4, 2), (4, 4))
-            elif idx == 7:
-                self.action = ((4, 2), (4, 3))
-            elif idx == 8:
-                self.action = ((4, 3), (4, 1))
-            elif idx == 9:
-                self.action = ((4, 3), (4, 2))
-            elif idx == 10:
-                self.action = ((4, 2), (4, 1))
-            elif idx == 11:
-                self.action = ((4, 3), (4, 4))
-        return (idx + 1)
-
-    def lastPeriod2(self, state):
-        global step
-        player = state[0]
-        legal_actions = self.game.actions(state)
-        self.action = random.choice(legal_actions)
-        legal_actions.sort(key=self.sortdiff)
-
-        gameEnded = self.finalruns(state, player)
-
-        if not gameEnded:
-            self.lastPeriod(state)
 
     ############### 总函数 #################################################
     def getAction(self, state):

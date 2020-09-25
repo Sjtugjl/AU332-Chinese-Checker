@@ -98,7 +98,7 @@ class TeamNameMinimaxAgent(Agent):
         return -valueP1
 
     ############   开局部分找最大评价分 #######################################
-    def maxStart(self, state, layer):
+    def maxStart(self, state, layer): # P1 ok, P2 no ok
         value = min_num
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -113,25 +113,28 @@ class TeamNameMinimaxAgent(Agent):
             legal_actions = legal_actions[::-1]
         # start = time.time()
         # iter = 0
-        for action in legal_actions:
-            if action == preaction:
-                continue
-            if action[0][0] - action[1][0] <= -1:
-                continue
-            if action[0][0] <= 4:
-                continue
-            board = copy.deepcopy(state[1])
-            board.board_status[action[1]] = board.board_status[action[0]]
-            board.board_status[action[0]] = 0
-            next_state = (player, board)
-            posPlayer1 = next_state[1].getPlayerPiecePositions1(1)
-            naction = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
-            if value < naction:
-                value = naction
+        if player == 1:
+            legal_actions = legal_actions[:40]
+            for action in legal_actions:
+
+                if action == preaction:
+                    continue
+                if action[0][0] - action[1][0] <= -1:
+                    continue
+                if action[0][0] <= 4:
+                    continue
+                board = copy.deepcopy(state[1])
+                board.board_status[action[1]] = board.board_status[action[0]]
+                board.board_status[action[0]] = 0
+                next_state = (player, board)
+                posPlayer1 = next_state[1].getPlayerPiecePositions1(1)
+                naction = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
+                if value < naction:
+                    value = naction
         return value
 
     ############### 开局部总函数 ############################################
-    def firstPeriod(self, state):
+    def firstPeriod(self, state):# P1 ok, P2 no OK
         global step, preaction
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -256,7 +259,6 @@ class TeamNameMinimaxAgent(Agent):
         #valueP1 -= divergence
         return -valueP1
 
-
     def heuristicP2(self, pos, target2, target4,base=4):
         valueP2 = 0  # 我们的棋子的hx值
         averOfRowP2 = 0  # 我们棋子行数的平均值
@@ -288,15 +290,19 @@ class TeamNameMinimaxAgent(Agent):
         return valueP2
 
     ############### 中期找最大最小评价分 ######################################
-    def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):
+    def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):#P1 ok, P2 ok
         global preaction
         player = state[0]
         legal_actions = self.game.actions(state)
         legal_actions.sort(key=self.sortdiff)
-        legal_actions = legal_actions[::-1]
+
+        if player == 2:
+            legal_actions = legal_actions[::-1]
+            legal_actions = legal_actions[:40]
 
         if player == 1:
             value = min_num
+            legal_actions = legal_actions[:40]
             for action in legal_actions:
                 if action == preaction:
                     continue
@@ -326,7 +332,8 @@ class TeamNameMinimaxAgent(Agent):
             return value
 
     ############### 中期总函数 ##############################################
-    def middlePeriod(self, state):
+    def middlePeriod(self, state):  #P1 ok . P2 no OK
+
         global step, preaction
         player = state[0]
         value = min_num
@@ -334,20 +341,26 @@ class TeamNameMinimaxAgent(Agent):
         tmp = random.choice(legal_actions)
         rdm = tmp
         legal_actions.sort(key=self.sortdiff)
-        for action in legal_actions:
-            if action == preaction:
-                continue
-            if action[0][0] - action[1][0] <= -1:
-                continue
-            if action[0][0] <= 4:
-                continue
-            minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, 1, 2)
-            if minimax_action_value > value:
-                value = minimax_action_value
-                tmp = action
-                preaction = tmp[::-1]
-        if rdm == tmp:
-            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
+
+        if player == 2:
+            legal_actions = legal_actions[::-1]
+            legal_actions = legal_actions[:40]
+        if player == 1:
+            legal_actions = legal_actions[:40]
+            for action in legal_actions:
+                if action == preaction:
+                    continue
+                if action[0][0] - action[1][0] <= -1:
+                    continue
+                if action[0][0] <= 4:
+                    continue
+                minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, 1, 2)
+                if minimax_action_value > value:
+                    value = minimax_action_value
+                    tmp = action
+                    preaction = tmp[::-1]
+#       if rdm == tmp:
+#            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     ############### 收官部分评价函数值 ########################################
@@ -407,7 +420,7 @@ class TeamNameMinimaxAgent(Agent):
         return valueP1,positionScore,targetScore
 
     ############   收官部分找最大评价分 #######################################
-    def maxEnd(self, state, paction):
+    def maxEnd(self, state, paction): # P1  ok, p2 no OK
         global preaction, step
         value = min_num
         legal_actions = self.game.actions(state)
@@ -422,11 +435,14 @@ class TeamNameMinimaxAgent(Agent):
 
         if player == 2:
             legal_actions = legal_actions[::-1]
+            legal_actions  = legal_actions[:14]
 
         if state[1].isEnd(step)[0]:
-            print("Winning", legal_actions)
+           #print("Winning", legal_actions)
             value = max_num
         else:
+            if player == 1 :
+                legal_actions = legal_actions[:14]
             for action in legal_actions:
                 if action[0][0] - action[1][0] <= -1:
                     continue
@@ -446,7 +462,7 @@ class TeamNameMinimaxAgent(Agent):
         return value,positionScore,targetScore
 
     ############### 收官部总函数 ############################################
-    def lastPeriod(self, state):
+    def lastPeriod(self, state): # P1 ok, P2 no OK
         global preaction
         # print("preaction", preaction)
         global step
@@ -476,8 +492,8 @@ class TeamNameMinimaxAgent(Agent):
             print("bestlist", bestList)
             print("tmp",tmp)
             preaction = tmp[::-1]
-        if rdm == tmp:
-            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
+     #   if rdm == tmp:
+     #       print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     def finalruns(self, state, player):

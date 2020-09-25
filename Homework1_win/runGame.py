@@ -44,8 +44,12 @@ def runGame(ccgame, agents):
         time2 = time.time()
         if player == 1:
             print("P1's Time is :", time2 - time1)
+            if (time2 - time1) > 1:
+                print('\033[1;30;41m' + 'Over Time Limit' + '\033[0m')
         if player == 2:
             print("P2's Time is :", time2 - time1)
+            if (time2 - time1) > 1:
+                print('\033[1;30;41m' + 'Over Time Limit' + '\033[0m')
         legal_actions = ccgame.actions(state)
 
         if agent.action not in legal_actions:
@@ -99,7 +103,7 @@ def callback(ccgame):
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
     teamAgent = TeamNameMinimaxAgent(ccgame)
-    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 100, ccgame)
+    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
 
 
 if __name__ == '__main__':

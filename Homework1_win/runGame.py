@@ -62,8 +62,6 @@ def runGame(ccgame, agents):
     if ccgame.isEnd(state, iter):
         return state[1].isEnd(iter)[1]  # return winner
     else:  # stuck situation]
-        with open('ties.txt', 'w') as t:
-            t.write(' ')
         drawTie()
         print('stuck!')
         return 0
@@ -101,7 +99,7 @@ def callback(ccgame):
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
     teamAgent = TeamNameMinimaxAgent(ccgame)
-    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
+    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 100, ccgame)
 
 
 if __name__ == '__main__':

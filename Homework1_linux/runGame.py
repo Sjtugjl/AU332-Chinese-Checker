@@ -82,8 +82,6 @@ def runGame(ccgame, agents):
     if ccgame.isEnd(state, iter):
         return state[1].isEnd(iter)[1]  # return winner
     else:  # stuck situation
-        with open('ties.txt', 'w') as t:
-        	t.write(' ')
         drawTie()
         print('stuck!')
         return 0

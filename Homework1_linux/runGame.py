@@ -7,6 +7,24 @@ from UI import GameBoard
 import time
 import datetime
 # 1 seconds
+
+def drawTie():
+    with open('ties.txt', 'a') as t:
+        for row in range(1, board.board.size + 1):
+            t.write(' ' * (board.board.size - row))
+            for col in range(1, board.board.getColNum(row) + 1):
+                str1 = str(board.board.board_status[(row, col)])
+                t.write(str1 + ' ')
+
+            t.write('\n')
+
+        for row in range(board.board.size + 1, board.board.size * 2):
+            t.write(' ' * (row - board.board.size))
+            for col in range(1, board.board.getColNum(row) + 1):
+                str1 = str(board.board.board_status[(row, col)])
+                t.write(str1 + ' ')
+            t.write('\n')
+
 def timeout(func, param, timeout_duration=500, default=None):
     import signal
 
@@ -64,6 +82,9 @@ def runGame(ccgame, agents):
     if ccgame.isEnd(state, iter):
         return state[1].isEnd(iter)[1]  # return winner
     else:  # stuck situation
+        with open('ties.txt', 'w') as t:
+        	t.write(' ')
+        drawTie()
         print('stuck!')
         return 0
 

@@ -239,7 +239,7 @@ class TeamNameMinimaxAgent(Agent):
             #totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 20
+                    valueP1 -= 10
                 else:
                     valueP1 -= 4*row
             if piece_type == 3 and ([row, column] in target3):
@@ -248,7 +248,7 @@ class TeamNameMinimaxAgent(Agent):
                 valueP1 = 100000
 
         if lastRow - firstRow >8:
-            divergence = 5
+            divergence = 9
 
         valueP1 += divergence
 

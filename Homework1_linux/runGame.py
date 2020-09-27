@@ -49,7 +49,7 @@ def timeout(func, param, timeout_duration=500, default=None):
     finally:
         signal.alarm(0)
 
-def runGame(ccgame, agents):
+def runGame(ccgame, agents,divergence):
     state = ccgame.startState()
     # print(state)
     max_iter = 200  # deal with some stuck situations
@@ -87,15 +87,16 @@ def runGame(ccgame, agents):
         return 0
 
 
-def simulateMultipleGames(agents_dict, simulation_times, ccgame):
+def simulateMultipleGames(agents_dict, simulation_times, ccgame,divergence):
     steplist = []
     win_times_P1 = 0
     win_times_P2 = 0
     tie_times = 0
     utility_sum = 0
     for i in range(simulation_times):
+
         ag.step = 0
-        run_result = runGame(ccgame, agents_dict)
+        run_result = runGame(ccgame, agents_dict,divergence)
         print(run_result)
         if run_result == 1:
             win_times_P1 += 1
@@ -104,21 +105,30 @@ def simulateMultipleGames(agents_dict, simulation_times, ccgame):
         elif run_result == 0:
             tie_times += 1
         steplist.append([run_result,ag.step])
+        utility_sum += ag.step
         print('game', i + 1, 'finished', 'winner is player ', run_result,'\t total', ag.step,'step used')
+
     print('In', simulation_times, 'simulations:')
     print('winning times: for player 1 is ', win_times_P1)
     print('winning times: for player 2 is ', win_times_P2)
     print('Tie times:', tie_times)
     print('Step list', steplist)
+    file = open("different_divergence.txt", "a")
+    file.writelines("Divergence：" + str(divergence) + '\n')
+    file.writelines(str(steplist) + '\n')
+    file.writelines("average："+str(utility_sum/simulation_times)+'\n')
+    file.close()
 
-def callback(ccgame):
-    B.destroy()
-    simpleGreedyAgent = SimpleGreedyAgent(ccgame)
-    simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
-    randomAgent = RandomAgent(ccgame)
-    teamAgent = TeamNameMinimaxAgent(ccgame)
-    # simulateMultipleGames({1: simpleGreedyAgent1, 2: simpleGreedyAgent}, 10, ccgame)
-    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
+
+def callback(ccgame,divergence):
+    for i in range(12,20):
+        B.destroy()
+        simpleGreedyAgent = SimpleGreedyAgent(ccgame,divergence)
+        simpleGreedyAgent1 = SimpleGreedyAgent(ccgame,divergence)
+        randomAgent = RandomAgent(ccgame,divergence)
+        teamAgent = TeamNameMinimaxAgent(ccgame,divergence)
+        # simulateMultipleGames({1: simpleGreedyAgent1, 2: simpleGreedyAgent}, 10, ccgame)
+        simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 100, ccgame,divergence=i)
 
    
 
@@ -128,6 +138,6 @@ if __name__ == '__main__':
     root = tk.Tk()
     board = GameBoard(root,ccgame.size,ccgame.size * 2 - 1,ccgame.board)
     board.pack(side="top", fill="both", expand="true", padx=4, pady=4)
-    B = tk.Button(board, text="Start", command = lambda: callback(ccgame=ccgame))
+    B = tk.Button(board, text="Start", command = lambda: callback(ccgame=ccgame,divergence=3))
     B.pack()
     root.mainloop()

@@ -4,8 +4,9 @@ import math, sys
 
 
 class Agent(object):
-    def __init__(self, game):
+    def __init__(self, game,divergence):
         self.game = game
+        self.divergence = divergence
 
     def getAction(self, state):
         raise Exception("Not implemented yet")
@@ -73,10 +74,10 @@ class TeamNameMinimaxAgent(Agent):
         #averOfRowP1 = averOfRowP1 / 10
 
         for row, column, piece_type in pos:# valueP1越小，p1越接近胜利
-            if row < firstRow:
-                firstRow = row
-            if row > lastRow:
-                lastRow = row
+            #if row < firstRow:
+            #    firstRow = row
+            #if row > lastRow:
+            #    lastRow = row
             if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
                 left = (10 - abs(row - 10)) // 2 + 1
                 valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
@@ -90,10 +91,10 @@ class TeamNameMinimaxAgent(Agent):
             # if piece_type == 3 and ([row, column] in target3):
             #    valueP1 -= 4
 
-        if lastRow - firstRow > 9:
-            divergence = 5
+        #if lastRow - firstRow > 9:
+        #    divergence = self.divergence
 
-        valueP1 += divergence
+        #valueP1 += divergence
 
         return -valueP1
 
@@ -242,7 +243,7 @@ class TeamNameMinimaxAgent(Agent):
             #totalDiffRowP1 += abs(row - averOfRowP1)
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
-                    valueP1 -= 12
+                    valueP1 -= 13
                 else:
                     valueP1 -= 4*row
             if piece_type == 3 and ([row, column] in target3):
@@ -251,7 +252,7 @@ class TeamNameMinimaxAgent(Agent):
                 valueP1 = 100000
 
         if lastRow - firstRow >7:
-            divergence = 9
+            divergence = self.divergence
 
         valueP1 += divergence
 
@@ -312,7 +313,7 @@ class TeamNameMinimaxAgent(Agent):
                     continue
                 succor = self.game.succ(state, action)
                 value = max(value,
-                            self.EvaluationFunction(succor))
+                            self.EvaluationFunction(succor,divergence=d))
                 if value >= beta:
                     return value
                 alpha = max(alpha, value)

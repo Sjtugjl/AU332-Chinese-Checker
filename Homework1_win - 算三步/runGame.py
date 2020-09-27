@@ -1,5 +1,7 @@
 from agent import *
-import agent as ag
+from agent2steps import *
+import agent2steps as ag2
+import agent as ag1
 from game import ChineseChecker
 import datetime
 import tkinter as tk
@@ -73,13 +75,14 @@ def runGame(ccgame, agents):
 
 def simulateMultipleGames(agents_dict, simulation_times, ccgame):
 
-    steplist = []
+    steplist1, steplist2 = [], []
     win_times_P1 = 0
     win_times_P2 = 0
     tie_times = 0
     utility_sum = 0
     for i in range(simulation_times):
-        ag.step = 0
+        ag1.step = 0
+        ag2.step = 0
         run_result = runGame(ccgame, agents_dict)
         print(run_result, step)
         if run_result == 1:
@@ -88,17 +91,22 @@ def simulateMultipleGames(agents_dict, simulation_times, ccgame):
             win_times_P2 += 1
         elif run_result == 0:
             tie_times += 1
-        steplist.append([run_result, ag.step])
-        print('game', i + 1, 'finished', 'winner is player ', run_result,'\t total', ag.step,'step used')
+        steplist1.append([run_result, ag1.step])
+        steplist2.append([run_result, ag2.step])
+        print('game', i + 1, 'finished', 'winner is player ', run_result,'\t total', ag1.step,'step used')
     print('In', simulation_times, 'simulations:')
     print('winning times: for player 1 is ', win_times_P1)
     print('winning times: for player 2 is ', win_times_P2)
     print('Tie times:', tie_times)
-    print('Step list', steplist)
-    avg = 0
-    for i in steplist:
-        avg += i[1]
-    print('avg step', float(avg/100))
+    print('Step list1', steplist1)
+    print('Step list2', steplist2)
+    avg1, avg2 = 0, 0
+    for i in steplist1:
+        avg1 += i[1]
+    for i in steplist2:
+        avg2 += i[1]
+    print('avg step of P1', float(avg1/10))
+    print('avg step of P2', float(avg2 / 10))
 
 
 def callback(ccgame):
@@ -106,10 +114,11 @@ def callback(ccgame):
     simpleGreedyAgent = SimpleGreedyAgent(ccgame)
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
-    teamAgent = TeamNameMinimaxAgent(ccgame)
-    simulateMultipleGames({1: simpleGreedyAgent, 2: teamAgent}, 1, ccgame)
-    # simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
-
+    #
+    simpleGreedyAgent = SimpleGreedyAgent(ccgame)
+    teamAgent2 = theCarthagianAgent(ccgame)
+    teamAgent1 = lookThreeSteps(ccgame)
+    simulateMultipleGames({1: teamAgent1, 2: teamAgent2}, 10, ccgame)
 
 
 if __name__ == '__main__':

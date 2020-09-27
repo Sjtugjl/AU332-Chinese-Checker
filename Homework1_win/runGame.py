@@ -95,6 +95,10 @@ def simulateMultipleGames(agents_dict, simulation_times, ccgame):
     print('winning times: for player 2 is ', win_times_P2)
     print('Tie times:', tie_times)
     print('Step list', steplist)
+    avg = 0
+    for i in steplist:
+        avg += i[1]
+    print('avg step', float(avg/100))
 
 
 def callback(ccgame):
@@ -103,7 +107,7 @@ def callback(ccgame):
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
     teamAgent = TeamNameMinimaxAgent(ccgame)
-    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 1, ccgame)
+    simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 100, ccgame)
 
 
 if __name__ == '__main__':

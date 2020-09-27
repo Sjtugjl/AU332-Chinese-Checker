@@ -1,6 +1,5 @@
 import random, re, datetime
-import copy
-import math, sys
+
 
 
 class Agent(object):
@@ -99,8 +98,7 @@ class TeamNameMinimaxAgent(Agent):
         return -valueP1
 
     ############   开局部分找最大评价分 #######################################
-    def maxStart(self, state, layer): # P1 ok, P2 no ok
-        value = min_num
+    def maxStart(self, state, layer): # P1 ok, P2 ok value现在都是越大越好
         player = state[0]
         legal_actions = self.game.actions(state)
         self.action = random.choice(legal_actions)
@@ -110,15 +108,21 @@ class TeamNameMinimaxAgent(Agent):
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
 
+        posPlayer2 = state[1].getPlayerPiecePositions1(2)
+        p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
+        p2Type4Target = [[18, 1], [18, 2], [17, 2]]
+
         if player == 2:
             legal_actions = legal_actions[::-1]
-        # start = time.time()
-        # iter = 0
+
         if player == 1:
+            value = min_num
             legal_actions = legal_actions[:40]
             for action in legal_actions:
 
                 if action == preaction:
+                    continue
+                if action == preaction[::-1]:
                     continue
                 if action[0][0] - action[1][0] <= -1:
                     continue
@@ -128,14 +132,34 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                posPlayer1 = next_state[1].getPlayerPiecePositions1(1)
-                naction = self.startevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
+                posPlayer = next_state[1].getPlayerPiecePositions1(player)
+                naction = self.startevaluation(pos=posPlayer, target1=p1Type1Target, target3=p1Type3Target)
+                if value < naction:
+                    value = naction
+        else:
+            value = min_num
+            legal_actions = legal_actions[:40]
+            for action in legal_actions:
+                if action == preaction:
+                    continue
+                if action == preaction[::-1]:
+                    continue
+                if action[0][0] - action[1][0] >= 1:
+                    continue
+                if action[0][0] >= 16:
+                    continue
+                board = copy.deepcopy(state[1])
+                board.board_status[action[1]] = board.board_status[action[0]]
+                board.board_status[action[0]] = 0
+                next_state = (player, board)
+                posPlayer = next_state[1].getPlayerPiecePositions1(player)
+                naction = self.startevaluation(pos=posPlayer, target1=p2Type2Target, target3=p2Type4Target)
                 if value < naction:
                     value = naction
         return value
 
     ############### 开局部总函数 ############################################
-    def firstPeriod(self, state):# P1 ok, P2 no OK
+    def firstPeriod(self, state):# P1 ok, P2 OK    value都是得到最大值
         global step, preaction
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -186,8 +210,31 @@ class TeamNameMinimaxAgent(Agent):
                 #         tmp = action
                 #         print("action",tmp)
 
-        if rdm == tmp:
-            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
+        # if rdm == tmp:
+        #     print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
+        elif player == 2:
+            if step == 1:
+                tmp = ((4, 1), (5, 2))
+            else:
+                value = min_num
+                bestValue = min_num
+                actionlist = []
+                bestAction = None
+
+                for action in legal_actions:
+                    if action == preaction:
+                        continue
+                    if action[0][0] - action[1][0] >= 1:
+                        continue
+                    board = copy.deepcopy(state[1])
+                    board.board_status[action[1]] = board.board_status[action[0]]
+                    board.board_status[action[0]] = 0
+                    next_state = (player, board)
+                    max_action_value = self.maxStart(next_state, 2)
+                    if max_action_value > value:
+                        value = max_action_value
+                        tmp = action
+                        preaction = tmp[::-1]
         return tmp
 
     ############### 中期部分评价函数 #########################################
@@ -214,6 +261,7 @@ class TeamNameMinimaxAgent(Agent):
 
         # value = valueP1 - valueP2 + densityP2
         value = valueP1 - valueP2
+
         return value
 
     def heuristicP1(self, pos, target1, target3):  # target1:p1Type1Target
@@ -291,7 +339,7 @@ class TeamNameMinimaxAgent(Agent):
         return valueP2
 
     ############### 中期找最大最小评价分 ######################################
-    def MinimaxAlgi(self, state, alpha, beta, current_d, max_d):#P1 ok, P2 ok
+    def MinimaxAlgiP1(self, state, alpha, beta, current_d, max_d):#P1 ok
         global preaction
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -332,8 +380,47 @@ class TeamNameMinimaxAgent(Agent):
                 beta = min(beta, value)
             return value
 
+    def MinimaxAlgiP2(self, state, alpha, beta, current_d, max_d):  # P2 ok
+        global preaction
+        player = state[0]
+        legal_actions = self.game.actions(state)
+        legal_actions.sort(key=self.sortdiff)
+
+        if player == 2:
+            legal_actions = legal_actions[::-1]
+            legal_actions = legal_actions[:40]
+            value = min_num
+            for action in legal_actions:
+                if action == preaction:
+                    continue
+                if action[0][0] - action[1][0] >= 1:
+                    continue
+                if action[0][0] >= 16:
+                    continue
+                succor = self.game.succ(state, action)
+                value = max(value,
+                            self.EvaluationFunction(succor))
+                if value >= beta:
+                    return value
+                alpha = max(alpha, value)
+            return value
+        else:
+            legal_actions = legal_actions[:40]
+            value = max_num
+            for action in legal_actions:
+                if action[0][0] - action[1][0] <= -1:
+                    continue
+                if action[0][0] <= 4:
+                    continue
+                value = min(value,
+                            self.EvaluationFunction(state))
+                if value <= alpha:
+                    return value
+                beta = min(beta, value)
+            return value
+
     ############### 中期总函数 ##############################################
-    def middlePeriod(self, state):  #P1 ok . P2 no OK
+    def middlePeriod(self, state):  #P1 ok . P2 OK value big is good
 
         global step, preaction
         player = state[0]
@@ -355,7 +442,20 @@ class TeamNameMinimaxAgent(Agent):
                     continue
                 if action[0][0] <= 4:
                     continue
-                minimax_action_value = self.MinimaxAlgi(self.game.succ(state, action), min_num, max_num, 1, 2)
+                minimax_action_value = self.MinimaxAlgiP1(self.game.succ(state, action), min_num, max_num, 1, 2)
+                if minimax_action_value > value:
+                    value = minimax_action_value
+                    tmp = action
+                    preaction = tmp[::-1]
+        else:
+            for action in legal_actions:
+                if action == preaction:
+                    continue
+                if action[0][0] - action[1][0] >= 1:
+                    continue
+                if action[0][0] <= 16 :
+                    continue
+                minimax_action_value = self.MinimaxAlgiP2(self.game.succ(state, action), min_num, max_num, 1, 2)
                 if minimax_action_value > value:
                     value = minimax_action_value
                     tmp = action
@@ -368,7 +468,7 @@ class TeamNameMinimaxAgent(Agent):
     def lastevaluation(self, pos, target1, target3):
         valueP1 = 10000  # 我们的棋子的hx值
         positionScore = 0 #The basic score based on the sum of rows of my our pieces
-        targetScore = [0]#The bonus or penalty of a going to a target,
+        targetScore = [0] #The bonus or penalty of a going to a target,
         #The first elements is the score of a bonus or penalty
         #The seconde element is the type of this bonus or penalty
         #In other words,it explains why this bonus or penalty is given
@@ -421,7 +521,7 @@ class TeamNameMinimaxAgent(Agent):
         return valueP1,positionScore,targetScore
 
     ############   收官部分找最大评价分 #######################################
-    def maxEnd(self, state, paction): # P1  ok, p2 no OK
+    def maxEnd(self, state, paction): # P1  ok, p2 OK value big is good
         global preaction, step
         value = min_num
         legal_actions = self.game.actions(state)
@@ -435,6 +535,8 @@ class TeamNameMinimaxAgent(Agent):
 
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
+        p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
+        p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
         if player == 2:
             legal_actions = legal_actions[::-1]
@@ -445,10 +547,10 @@ class TeamNameMinimaxAgent(Agent):
             value = max_num
         else:
             if player == 1 :
-                legal_actions = legal_actions[:14]
+                legal_actions = legal_actions[:40]
             for action in legal_actions:
-                if action[0][0] - action[1][0] <= -1:
-                    continue
+                #if action[0][0] - action[1][0] <= -1:
+                #    continue
                 if action == preaction:
                     continue
                 if action == preaction[::-1]:
@@ -457,19 +559,37 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                posPlayer1 = next_state[1].getPlayerPiecePositions1(1)
+                posPlayer1 = next_state[1].getPlayerPiecePositions1(player)
                 # print("PosP1", posPlayer1)
                 naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
                 if value < naction:
                     value = naction
                     bestpositionScore  = positionScore
                     besttargetScore = targetScore
+            else:
+                legal_actions = legal_actions[:40]
+                for action in legal_actions:
+                    #if action[0][0] - action[1][0] >= 1:
+                    #    continue
+                    if action == preaction:
+                        continue
+                    if action == preaction[::-1]:
+                        continue
+                    board = copy.deepcopy(state[1])
+                    board.board_status[action[1]] = board.board_status[action[0]]
+                    board.board_status[action[0]] = 0
+                    next_state = (player, board)
+                    posPlayer = next_state[1].getPlayerPiecePositions1(player)
+                    naction, positionScore, targetScore = self.lastevaluation(pos=posPlayer, target1=p2Type2Target, target3=p2Type4Target)
+                    if value < naction:
+                        value = naction
+                        bestpositionScore = positionScore
+                        besttargetScore = targetScore
         return value,bestpositionScore,besttargetScore
 
     ############### 收官部总函数 ############################################
-    def lastPeriod(self, state): # P1 ok, P2 no OK
+    def lastPeriod(self, state): # P1 ok, P2 OK value big is good
         global preaction
-        # print("preaction", preaction)
         global step
         player = state[0]
         legal_actions = self.game.actions(state)
@@ -500,6 +620,30 @@ class TeamNameMinimaxAgent(Agent):
             print("bestlist", bestList)
             print("tmp",tmp)
             preaction = tmp[::-1]
+        else:
+            value = min_num
+            legal_actions   = legal_actions[::-1]
+            for action in legal_actions:
+                if action == preaction:
+                    continue
+                board = copy.deepcopy(state[1])
+                board.board_status[action[1]] = board.board_status[action[0]]
+                board.board_status[action[0]] = 0
+                next_state = (player, board)
+                max_action_value, positionScore, targetScore = self.maxEnd(next_state, action)
+                print("action:", action, ",value:", max_action_value)
+                print("basic score:", positionScore)
+                print("target score:", targetScore)
+                if max_action_value > value:
+                    bestList = []
+                    bestList.append(action)
+                    value = max_action_value
+                elif max_action_value == value:
+                    bestList.append(action)
+            tmp = random.choice(bestList)
+            print("bestlist", bestList)
+            print("tmp", tmp)
+            preaction = tmp[::-1]
      #   if rdm == tmp:
      #       print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
@@ -521,30 +665,26 @@ class TeamNameMinimaxAgent(Agent):
         firstrow1, lastrow1 = self.findTwosides(1, pos1)
         firstrow2, lastrow2 = self.findTwosides(2, pos2)
 
-        if player == 1:
-            value = min_num  # 0 is smallest revenue
-            # The Start Part of Game
-            if firstrow1 >= firstrow2:
-                tmp = self.firstPeriod(state)
-                self.action = tmp
-                print("Now State", 1, "action:", self.action)
-            # The Middle Part of Game
-            elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
-                tmp = self.middlePeriod(state)
-                self.action = tmp
-                print("\nNow State", 2, 'action', self.action)
-            # The Ending Part of Game
-            elif lastrow1 < lastrow2:
-                tmp = self.lastPeriod(state)
-                self.action = tmp
-                print("\nNow State", 3, 'Final Action', self.action)
-            else:
-                print('\033[1;30;41m' + 'error in choose state of game.' + '\033[0m')
-
-        # else:  # Play As Player 2
+        # The Start Part of Game
+        if firstrow1 >= firstrow2:
+            tmp = self.firstPeriod(state)
+            self.action = tmp
+            print("Now State", 1, "action:", self.action)
+        # The Middle Part of Game
+        elif firstrow1 < firstrow2 and lastrow1 >= lastrow2:
+            tmp = self.middlePeriod(state)
+            self.action = tmp
+            print("\nNow State", 2, 'action', self.action)
+        # The Ending Part of Game
+        elif lastrow1 < lastrow2:
+            tmp = self.lastPeriod(state)
+            self.action = tmp
+            print("\nNow State", 3, 'Final Action', self.action)
+        else:
+            print('\033[1;30;41m' + 'error in choose state of game.' + '\033[0m')
         print("Now step:", step, "Want Run", self.action)
 
-
+import sys, copy, math
 step = 0
 preaction = None
 max_num = sys.maxsize - 1

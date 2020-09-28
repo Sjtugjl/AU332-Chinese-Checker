@@ -1,5 +1,5 @@
-from agent import *
-import agent as ag
+from agent2steps import *
+import agent2steps as ag
 from game import ChineseChecker
 import datetime
 import tkinter as tk
@@ -25,7 +25,7 @@ def drawTie():
                 t.write(str1 + ' ')
             t.write('\n')
 
-def timeout(func, param, timeout_duration=500, default=None):
+def timeout(func, param, timeout_duration=10, default=None):
     import signal
 
     class TimeoutError(Exception):
@@ -122,9 +122,9 @@ def callback(ccgame,divergence):
     simpleGreedyAgent = SimpleGreedyAgent(ccgame)
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
-    teamAgent = TeamNameMinimaxAgent(ccgame)
+    teamAgent = theCarthagianAgent(ccgame)
     # simulateMultipleGames({1: simpleGreedyAgent1, 2: simpleGreedyAgent}, 10, ccgame)
-    simulateMultipleGames({2: teamAgent, 1: simpleGreedyAgent}, 5, ccgame)
+    simulateMultipleGames({ 1: teamAgent, 2: simpleGreedyAgent}, 10, ccgame)
 
    
 

@@ -115,10 +115,11 @@ def callback(ccgame):
     simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
     randomAgent = RandomAgent(ccgame)
     #
-    simpleGreedyAgent = SimpleGreedyAgent(ccgame)
-    teamAgent2 = theCarthagianAgent(ccgame)
     teamAgent1 = lookThreeSteps(ccgame)
-    simulateMultipleGames({1: teamAgent1, 2: teamAgent2}, 10, ccgame)
+
+    simpleGreedyAgent = SimpleGreedyAgent(ccgame)
+    teamAgent = theCarthagianAgent(ccgame)
+    simulateMultipleGames({2: teamAgent, 1: simpleGreedyAgent}, 10, ccgame)
 
 
 if __name__ == '__main__':

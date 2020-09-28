@@ -1,7 +1,5 @@
 import random, re, datetime
 
-
-
 class Agent(object):
     def __init__(self, game):
         self.game = game
@@ -35,7 +33,7 @@ class SimpleGreedyAgent(Agent):
                            action[1][0] - action[0][0] == max_vertical_advance_one_step]
         self.action = random.choice(max_actions)
 
-
+### START CODE HERE ###
 class theCarthagianAgent(Agent):
     def sortkey0(self, func):
         return func[0]
@@ -58,55 +56,10 @@ class theCarthagianAgent(Agent):
 
         return firstrow, lastrow
 
-    ############### 开局部分评价函数值 ########################################
-    '''
-    def startevaluation(self, pos, target1, target3):  # 开局部分的评价函数
-        valueP1 = 0  # 我们的棋子的hx值
-        divergence = 0
-        #averOfRowP1 = 0  # 我们棋子行数的平均值
-        #totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
-        firstRow = 19
-        lastRow = 0
-
-        #for onePiece in pos:
-        #   averOfRowP1 += onePiece[0]
-        #averOfRowP1 = averOfRowP1 / 10
-
-        for row, column, piece_type in pos:# valueP1越小，p1越接近胜利
-            if row < firstRow:
-                firstRow = row
-            if row > lastRow:
-                lastRow = row
-            if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                left = (10 - abs(row - 10)) // 2 + 1
-                valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
-            else:
-                left = (10 - abs(row - 10)) // 2
-                right = left + 1
-                valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            #totalDiffRowP1 += abs(row - averOfRowP1)
-            # if piece_type == 1 and ([row, column] in target1):
-            #    valueP1 -= 4
-            # if piece_type == 3 and ([row, column] in target3):
-            #    valueP1 -= 4
-
-        if lastRow - firstRow > 9:
-            divergence = 5
-
-        valueP1 += divergence
-
-        return -valueP1
-    '''
-
+    ############### 开局部分评价函数值 #######################################
     def startevaluation(self, pos, target1, target3, player):  # 开局部分的评价函数
         value = 0  # 我们的棋子的hx值
         divergence = 0
-        # averOfRowP1 = 0  # 我们棋子行数的平均值
-        # totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
-
-        # for onePiece in pos:
-        #   averOfRowP1 += onePiece[0]
-        # averOfRowP1 = averOfRowP1 / 10
         if player == 1:
             for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
                 if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
@@ -116,17 +69,6 @@ class theCarthagianAgent(Agent):
                     left = (10 - abs(row - 10)) // 2
                     right = left + 1
                     value += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-                # totalDiffRowP1 += abs(row - averOfRowP1)
-                # if piece_type == 1 and ([row, column] in target1):
-                #    valueP1 -= 4
-                # if piece_type == 3 and ([row, column] in target3):
-                #    valueP1 -= 4
-
-            # if lastRow - firstRow > 9:
-            #    divergence = self.divergence
-
-            # valueP1 += divergence
-
             return -value
         else:
             for row, column, piece_type in pos:  # value big:good,small:bad，p1越接近胜
@@ -138,6 +80,7 @@ class theCarthagianAgent(Agent):
                     right = left + 1
                     value += row - 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
             return value
+
     ############   开局部分找最大评价分 #######################################
     def maxStart(self, state, layer): # P1 ok, P2 ok value现在都是越大越好
         player = state[0]
@@ -145,12 +88,8 @@ class theCarthagianAgent(Agent):
         self.action = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
 
-        #posPlayer1 = state[1].getPlayerPiecePositions1(1)
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
-
-        #posPlayer2 = state[1].getPlayerPiecePositions1(2)
-        #posPlayer2 = self.getPlayerPiecePositions1(next_state[1], player)
 
         p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
         p2Type4Target = [[18, 1], [18, 2], [17, 2]]
@@ -160,9 +99,8 @@ class theCarthagianAgent(Agent):
 
         if player == 1:
             value = min_num
-            legal_actions = legal_actions[:40]
+            legal_actions = legal_actions[:15]
             for action in legal_actions:
-
                 if action == preaction:
                     continue
                 if action == preaction[::-1]:
@@ -175,15 +113,13 @@ class theCarthagianAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                #posPlayer = next_state[1].getPlayerPiecePositions1(player)
                 posPlayer = self.getPlayerPiecePositions1(next_state[1],player)
-
                 naction = self.startevaluation(pos=posPlayer, target1=p1Type1Target, target3=p1Type3Target,player=1)
                 if value < naction:
                     value = naction
         else:
             value = min_num
-            legal_actions = legal_actions[:40]
+            legal_actions = legal_actions[:15]
             for action in legal_actions:
                 if action == preaction:
                     continue
@@ -197,9 +133,7 @@ class theCarthagianAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                #posPlayer = next_state[1].getPlayerPiecePositions1(player)
                 posPlayer = self.getPlayerPiecePositions1(next_state[1],player)
-
                 naction = self.startevaluation(pos=posPlayer, target1=p2Type2Target, target3=p2Type4Target,player=2)
                 if value < naction:
                     value = naction
@@ -237,29 +171,6 @@ class theCarthagianAgent(Agent):
                         value = max_action_value
                         tmp = action
                         preaction = tmp[::-1]
-################  尝试算三步，但是目前每走一步要5s左右   ########################
-                # for action in legal_actions:
-                #     if action[0][0] - action[1][0] <= -1:
-                #         continue
-                #     state = self.game.succ(state, action)
-                #     legal_actions1 = self.game.actions(state)
-                #     legal_actions1.sort(key=self.sortdiff)
-                #
-                #     for action1 in legal_actions1:
-                #         if action1[0][0] - action1[1][0] <= -1:
-                #             continue
-                #         max_action_value = self.maxStart(self.game.succ(state, action), 2)
-                #         if max_action_value > value:
-                #             value = max_action_value
-                #
-                #     max_action1_value = value
-                #     if max_action1_value > bestValue:
-                #         bestValue = max_action1_value
-                #         tmp = action
-                #         print("action",tmp)
-
-        # if rdm == tmp:
-        #     print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         elif player == 2:
             if step == 1:
                 tmp = ((4, 1), (5, 2))
@@ -295,10 +206,6 @@ class theCarthagianAgent(Agent):
             if winner == 1:
                 return max_num  # Max revenue
             return min_num  # Min revenue
-
-        #posPlayer1 = state[1].getPlayerPiecePositions1(1)
-        #posPlayer2 = state[1].getPlayerPiecePositions1(2)
-
         posPlayer1 = self.getPlayerPiecePositions1(state[1],1)
         posPlayer2 = self.getPlayerPiecePositions1(state[1],2)
 
@@ -313,7 +220,6 @@ class theCarthagianAgent(Agent):
         valueP1 = self.heuristicP1(pos=posPlayer1, target1=p1Type1Target, target3=p1Type3Target)
         valueP2 = self.heuristicP2(pos=posPlayer2, target2=p2Type2Target, target4=p2Type4Target)
 
-        # value = valueP1 - valueP2 + densityP2
         if player == 2:
             value = valueP1 - valueP2
         else:
@@ -322,15 +228,9 @@ class theCarthagianAgent(Agent):
 
     def heuristicP1(self, pos, target1, target3):  # target1:p1Type1Target
         valueP1 = 0  # 我们的棋子的hx值
-        #averOfRowP1 = 0  # 我们棋子行数的平均值
-        #totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
         firstRow = 19
         lastRow = 0
         divergence = 0
-
-        #for onePiece in pos:
-        #    averOfRowP1 += onePiece[0]
-        #averOfRowP1 = averOfRowP1 / 10
 
         for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
             if row < firstRow:
@@ -344,7 +244,7 @@ class theCarthagianAgent(Agent):
                 left = (10 - abs(row - 10)) // 2
                 right = left + 1
                 valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            #totalDiffRowP1 += abs(row - averOfRowP1)
+
             if piece_type == 1 and ([row, column] in target1):
                 if row == 1 and column == 1:
                     valueP1 -= 12
@@ -354,47 +254,12 @@ class theCarthagianAgent(Agent):
                 valueP1 -= 7
             if piece_type == 3 and row == 1 and column == 1:
                 valueP1 = 100000
-
         if lastRow - firstRow >7:
             divergence = 9
-
         valueP1 += divergence
-
-        #divergence = math.log(totalDiffRowP1, 4)
-        #valueP1 -= divergence
         return -valueP1
 
     def heuristicP2(self, pos, target2, target4):
-        '''
-        valueP2 = 0  # 我们的棋子的hx值
-        averOfRowP2 = 0  # 我们棋子行数的平均值
-        totalDiffRowP2 = 0  # 我们棋子行数与平均值的差的和
-
-        for onePiece in pos:
-            averOfRowP2 += onePiece[0]
-        averOfRowP2 = averOfRowP2 / 10
-
-        for row, column, piece_type in pos:  # valueP2越大，p2越接近胜利
-            if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                left = (10 - abs(row - 10)) // 2 + 1
-                valueP2 += row + 3 * math.log(abs(column - left) + 1, 5)
-            else:
-                left = (10 - abs(row - 10)) // 2
-                right = left + 1
-                valueP2 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            totalDiffRowP2 += abs(row - averOfRowP2)
-            if piece_type == 2 and ([row, column] in target2):
-                if row == 19 and column == 1:
-                    valueP2 += 7
-                else:
-                    valueP2 += 4
-            if piece_type == 4 and ([row, column] in target4):
-                valueP2 += 7
-
-        #divergence = math.log(totalDiffRowP2, base)
-        #valueP2 -= divergence
-        return valueP2
-        '''
         valueP2 = 0# 我们的棋子的hx值
         divergence = 0
         firstRow = 0
@@ -438,11 +303,11 @@ class theCarthagianAgent(Agent):
 
         if player == 2:
             legal_actions = legal_actions[::-1]
-            legal_actions = legal_actions[:40]
+            legal_actions = legal_actions[:20]
 
         if player == 1:
             value = min_num
-            legal_actions = legal_actions[:40]
+            legal_actions = legal_actions[:20]
             for action in legal_actions:
                 if action == preaction:
                     continue
@@ -464,6 +329,7 @@ class theCarthagianAgent(Agent):
                     continue
                 if action[0][0] >= 16:
                     continue
+                succor = self.game.succ(state, action)
                 value = min(value,
                             self.EvaluationFunction(state))
                 if value <= alpha:
@@ -479,7 +345,7 @@ class theCarthagianAgent(Agent):
 
         if player == 2:
             legal_actions = legal_actions[::-1]
-            legal_actions = legal_actions[:40]
+            legal_actions = legal_actions[:20]
             value = min_num
             for action in legal_actions:
                 if action == preaction:
@@ -496,13 +362,14 @@ class theCarthagianAgent(Agent):
                 alpha = max(alpha, value)
             return value
         else:
-            legal_actions = legal_actions[:40]
+            legal_actions = legal_actions[:20]
             value = max_num
             for action in legal_actions:
                 if action[0][0] - action[1][0] <= -1:
                     continue
                 if action[0][0] <= 4:
                     continue
+                succor = self.game.succ(state, action)
                 value = min(value,
                             self.EvaluationFunction(state))
                 if value <= alpha:
@@ -551,90 +418,15 @@ class theCarthagianAgent(Agent):
                     value = minimax_action_value
                     tmp = action
                     preaction = tmp[::-1]
-       #if rdm == tmp:
-       #     print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     ############### 收官部分评价函数值 ########################################
-    '''
-    def lastevaluation(self, pos, target1, target3):
-        valueP1 = 10000  # 我们的棋子的hx值
-        positionScore = 0 #The basic score based on the sum of rows of my our pieces
-        targetScore = [0] #The bonus or penalty of a going to a target,
-        #The first elements is the score of a bonus or penalty
-        #The seconde element is the type of this bonus or penalty
-        #In other words,it explains why this bonus or penalty is given
-        # averOfRowP1 = 0  # 我们棋子行数的平均值
-        # totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
-
-        # for onePiece in pos:
-        #    averOfRowP1 += onePiece[0]
-        # averOfRowP1 = averOfRowP1 / 10
-
-        for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
-            #if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-            #    left = (10 - abs(row - 10)) // 2 + 1
-            #    valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
-            #else:
-            #    left = (10 - abs(row - 10)) // 2
-            #    right = left + 1
-            #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-            # totalDiffRowP1 += abs(row - averOfRowP1)
-            if piece_type == 1 and ([row, column] in target1):
-                if row == 1 and column == 1:
-                    targetScore[0] += 1000
-                    targetScore.append([row,column,"Blue in Peak"])
-                else:
-                    targetScore[0] += 50
-                    targetScore.append([row,column,"Blue in BLue"])
-            if piece_type == 3 and ([row, column] in target3):
-                targetScore[0] += 1000
-                targetScore.append([row,column,"Yellow in Yellow"])
-            #if piece_type == 1 and ([row,column] in target3):
-
-            if piece_type == 1 and ([row,column] in target3):
-                targetScore[0] -= 100
-                targetScore.append([row,column,"Blue in Yellow"])
-            if piece_type == 3 and row==1 and column ==1:
-                targetScore[0] -= 100000
-                targetScore.append([row,column,"Yellow in Peak"])
-            if ([row,column] not in target1) and ([row,column] not in target3):
-            #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-            #    left = (10 - abs(row - 10)) // 2 + 1
-                positionScore += row # + 3 * math.log(abs(column - left) + 1, 5)
-            # else:
-            #    left = (10 - abs(row - 10)) // 2
-            #    right = left + 1
-            #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) +
-
-        valueP1 = valueP1 - positionScore + targetScore[0]
-        # divergence = math.log(totalDiffRowP1, 5)
-        # valueP1 -= divergence
-        return valueP1,positionScore,targetScore
-    '''
     def lastevaluation(self, pos, targetBlueOrRed, targetYellowOrGreen,player):
         value = 0  # 我们的棋子的hx值
         positionScore = 0 #The basic score based on the sum of rows of my our pieces
         targetScore = [0] #The bonus or penalty of a going to a target,
-        #The first elements is the score of a bonus or penalty
-        #The seconde element is the type of this bonus or penalty
-        #In other words,it explains why this bonus or penalty is given
-        # averOfRowP1 = 0  # 我们棋子行数的平均值
-        # totalDiffRowP1 = 0  # 我们棋子行数与平均值的差的和
-
-        # for onePiece in pos:
-        #    averOfRowP1 += onePiece[0]
-        # averOfRowP1 = averOfRowP1 / 10
         if player == 1:
             for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
-                #if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                #    left = (10 - abs(row - 10)) // 2 + 1
-                #    valueP1 += row + 3 * math.log(abs(column - left) + 1, 5)
-                #else:
-                #    left = (10 - abs(row - 10)) // 2
-                #    right = left + 1
-                #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) + 1, 5)
-                # totalDiffRowP1 += abs(row - averOfRowP1)
                 if piece_type == 1 and ([row, column] in targetBlueOrRed):
                     if row == 1 and column == 1:
                         targetScore[0] += 1300
@@ -645,8 +437,6 @@ class theCarthagianAgent(Agent):
                 if piece_type == 3 and ([row, column] in targetYellowOrGreen):
                     targetScore[0] += 1250
                     targetScore.append([row,column,"Yellow in Yellow"])
-                #if piece_type == 1 and ([row,column] in targetYellowOrGreen):
-
                 if piece_type == 1 and ([row,column] in targetYellowOrGreen):
                     targetScore[0] -= 100
                     targetScore.append([row,column,"Blue in Yellow"])
@@ -654,29 +444,21 @@ class theCarthagianAgent(Agent):
                     targetScore[0] -= 100000
                     targetScore.append([row,column,"Yellow in Peak"])
                 if ([row,column] not in targetBlueOrRed) and ([row,column] not in targetYellowOrGreen):
-                #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                #    left = (10 - abs(row - 10)) // 2 + 1
-                    positionScore += row # + 3 * math.log(abs(column - left) + 1, 5)
-                # else:
-                #    left = (10 - abs(row - 10)) // 2
-                #    right = left + 1
-                #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) +
-
+                    positionScore += row
             value = value - positionScore + targetScore[0]
             return value,positionScore,targetScore
         else:
             for row, column, piece_type in pos:  # valueP1越小，p1越接近胜利
                 if piece_type == 2 and ([row, column] in targetBlueOrRed):
                     if row == 19 and column == 1:
-                        targetScore[0] += 1000
+                        targetScore[0] += 1300
                         targetScore.append([row,column,"Red in Peak"])
                     else:
-                        targetScore[0] += 50
+                        targetScore[0] += 200
                         targetScore.append([row,column,"Red in Red"])
                 if piece_type == 4 and ([row, column] in targetYellowOrGreen):
-                    targetScore[0] += 1000
+                    targetScore[0] += 1250
                     targetScore.append([row,column,"Green in Green"])
-                #if piece_type == 1 and ([row,column] in targetYellowOrGreen):
                 if piece_type == 2 and ([row,column] in targetYellowOrGreen):
                     targetScore[0] -= 100
                     targetScore.append([row,column,"Red in Greem"])
@@ -684,17 +466,8 @@ class theCarthagianAgent(Agent):
                     targetScore[0] -= 100000
                     targetScore.append([row,column,"Green in Peak"])
                 if ([row,column] not in targetBlueOrRed) and ([row,column] not in targetYellowOrGreen):
-                #    if (row - 1) % 2 == 0:  # row is in odd row,hence,a middle point exists.
-                #    left = (10 - abs(row - 10)) // 2 + 1
                     positionScore += row # + 3 * math.log(abs(column - left) + 1, 5)
-                # else:
-                #    left = (10 - abs(row - 10)) // 2
-                #    right = left + 1
-                #    valueP1 += row + 3 * math.log(min(abs(column - left), abs(column - right)) +
-
-            value = value - positionScore + targetScore[0]
-            # divergence = math.log(totalDiffRowP1, 5)
-            # valueP1 -= divergence
+            value = value + positionScore + targetScore[0]
             return value,positionScore,targetScore
     ############   收官部分找最大评价分 #######################################
     def maxEnd(self, state, paction): # P1  ok, p2 OK value big is good
@@ -719,14 +492,11 @@ class theCarthagianAgent(Agent):
             legal_actions  = legal_actions[:40]
 
         if state[1].isEnd(step)[0]:
-           #print("Winning", legal_actions)
             value = max_num
         else:
             if player == 1 :
-                legal_actions = legal_actions[:20]
+                legal_actions = legal_actions[:30]
                 for action in legal_actions:
-                    #if action[0][0] - action[1][0] <= -1:
-                    #    continue
                     if action == preaction:
                         continue
                     if action == preaction[::-1]:
@@ -735,9 +505,7 @@ class theCarthagianAgent(Agent):
                     board.board_status[action[1]] = board.board_status[action[0]]
                     board.board_status[action[0]] = 0
                     next_state = (player, board)
-                    #posPlayer1 = next_state[1].getPlayerPiecePositions1(player)
                     posPlayer1 = self.getPlayerPiecePositions1(next_state[1],player)
-                    # print("PosP1", posPlayer1)
                     naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, targetBlueOrRed=p1Type1Target, targetYellowOrGreen=p1Type3Target,player=1)
                     if value < naction:
                         value = naction
@@ -746,8 +514,6 @@ class theCarthagianAgent(Agent):
             else:
                 legal_actions = legal_actions[:30]
                 for action in legal_actions:
-                    #if action[0][0] - action[1][0] >= 1:
-                    #    continue
                     if action == preaction:
                         continue
                     if action == preaction[::-1]:
@@ -756,9 +522,7 @@ class theCarthagianAgent(Agent):
                     board.board_status[action[1]] = board.board_status[action[0]]
                     board.board_status[action[0]] = 0
                     next_state = (player, board)
-                    #posPlayer = next_state[1].getPlayerPiecePositions1(player)
                     posPlayer = self.getPlayerPiecePositions1(next_state[1],player)
-
                     naction, positionScore, targetScore = self.lastevaluation(pos=posPlayer, targetBlueOrRed=p2Type2Target, targetYellowOrGreen=p2Type4Target,player=2)
                     if value < naction:
                         value = naction
@@ -782,15 +546,11 @@ class theCarthagianAgent(Agent):
             for action in legal_actions:
                 if action == preaction:
                     continue
-
                 board = copy.deepcopy(state[1])
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
                 max_action_value,positionScore,targetScore = self.maxEnd(next_state, action)
-                # print("action:", action,",value:",max_action_value)
-                # print("basic score:",positionScore)
-                # print("target score:",targetScore)
                 if max_action_value > value:
                     bestList = []
                     bestList.append(action)
@@ -798,13 +558,11 @@ class theCarthagianAgent(Agent):
                 elif max_action_value == value:
                     bestList.append(action)
             tmp = random.choice(bestList)
-            # print("bestlist", bestList)
-            # print("tmp",tmp)
             preaction = tmp[::-1]
         else:
             value = min_num
-            legal_actions = legal_actions[:40]
             legal_actions   = legal_actions[::-1]
+            legal_actions = legal_actions[:20]
             for action in legal_actions:
                 if action == preaction:
                     continue
@@ -814,19 +572,6 @@ class theCarthagianAgent(Agent):
                 backToForthBonus = [0]
                 next_state = (player, board)
                 max_action_value, positionScore, targetScore = self.maxEnd(next_state, action)
-                if (action[0][0] <= 10 and action[1][0] > 10):
-                    backToForthBonus[0] += 100
-                    max_action_value += backToForthBonus[0]
-                    backToForthBonus.append("Across the mid line")
-                if action[0][0] <= 16 and action[1][0] - action[0][0] >= 1:
-                    backToForthBonus[0] += 100
-                    max_action_value += backToForthBonus[0]
-                    backToForthBonus.append("Advance from back")
-                # print("action:", action, ",value:", max_action_value)
-                # print("basic score:", positionScore)
-                # print("target score:", targetScore)
-                # print("back to forth bonus:",backToForthBonus)
-
                 if max_action_value > value:
                     bestList = []
                     bestList.append(action)
@@ -834,11 +579,7 @@ class theCarthagianAgent(Agent):
                 elif max_action_value == value:
                     bestList.append(action)
             tmp = random.choice(bestList)
-            # print("bestlist", bestList)
-            # print("tmp", tmp)
             preaction = tmp[::-1]
-     #   if rdm == tmp:
-     #       print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     ############### 总函数 #################################################
@@ -849,7 +590,7 @@ class theCarthagianAgent(Agent):
         self.action = random.choice(legal_actions)
 
         player = self.game.player(state)
-        ### START CODE HERE ###
+
         global step
         step += 1
         board = state[1]

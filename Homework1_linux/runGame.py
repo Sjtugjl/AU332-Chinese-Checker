@@ -49,7 +49,7 @@ def timeout(func, param, timeout_duration=500, default=None):
     finally:
         signal.alarm(0)
 
-def runGame(ccgame, agents,divergence):
+def runGame(ccgame, agents):
     state = ccgame.startState()
     # print(state)
     max_iter = 200  # deal with some stuck situations
@@ -87,16 +87,15 @@ def runGame(ccgame, agents,divergence):
         return 0
 
 
-def simulateMultipleGames(agents_dict, simulation_times, ccgame,divergence):
+def simulateMultipleGames(agents_dict, simulation_times, ccgame):
     steplist = []
     win_times_P1 = 0
     win_times_P2 = 0
     tie_times = 0
     utility_sum = 0
     for i in range(simulation_times):
-
         ag.step = 0
-        run_result = runGame(ccgame, agents_dict,divergence)
+        run_result = runGame(ccgame, agents_dict)
         print(run_result)
         if run_result == 1:
             win_times_P1 += 1
@@ -113,22 +112,19 @@ def simulateMultipleGames(agents_dict, simulation_times, ccgame,divergence):
     print('winning times: for player 2 is ', win_times_P2)
     print('Tie times:', tie_times)
     print('Step list', steplist)
-    file = open("different_divergence.txt", "a")
-    file.writelines("Divergence：" + str(divergence) + '\n')
+    file = open("result.txt", "a")
     file.writelines(str(steplist) + '\n')
-    file.writelines("average："+str(utility_sum/simulation_times)+'\n')
     file.close()
 
 
 def callback(ccgame,divergence):
-    for i in range(12,20):
-        B.destroy()
-        simpleGreedyAgent = SimpleGreedyAgent(ccgame,divergence)
-        simpleGreedyAgent1 = SimpleGreedyAgent(ccgame,divergence)
-        randomAgent = RandomAgent(ccgame,divergence)
-        teamAgent = TeamNameMinimaxAgent(ccgame,divergence)
-        # simulateMultipleGames({1: simpleGreedyAgent1, 2: simpleGreedyAgent}, 10, ccgame)
-        simulateMultipleGames({1: teamAgent, 2: simpleGreedyAgent}, 100, ccgame,divergence=i)
+    B.destroy()
+    simpleGreedyAgent = SimpleGreedyAgent(ccgame)
+    simpleGreedyAgent1 = SimpleGreedyAgent(ccgame)
+    randomAgent = RandomAgent(ccgame)
+    teamAgent = TeamNameMinimaxAgent(ccgame)
+    # simulateMultipleGames({1: simpleGreedyAgent1, 2: simpleGreedyAgent}, 10, ccgame)
+    simulateMultipleGames({2: teamAgent, 1: simpleGreedyAgent}, 5, ccgame)
 
    
 

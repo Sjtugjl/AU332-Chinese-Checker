@@ -145,13 +145,11 @@ class TeamNameMinimaxAgent(Agent):
         self.action = random.choice(legal_actions)
         legal_actions.sort(key=self.sortdiff)
 
-        #posPlayer1 = state[1].getPlayerPiecePositions1(1)
+        posPlayer1 = state[1].getPlayerPiecePositions1(1)
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
 
-        #posPlayer2 = state[1].getPlayerPiecePositions1(2)
-        #posPlayer2 = self.getPlayerPiecePositions1(next_state[1], player)
-
+        posPlayer2 = state[1].getPlayerPiecePositions1(2)
         p2Type2Target = [[19, 1], [17, 1], [17, 3], [16, 1], [16, 2], [16, 3], [16, 4]]
         p2Type4Target = [[18, 1], [18, 2], [17, 2]]
 
@@ -175,9 +173,7 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                #posPlayer = next_state[1].getPlayerPiecePositions1(player)
-                posPlayer = self.getPlayerPiecePositions1(next_state[1],player)
-
+                posPlayer = next_state[1].getPlayerPiecePositions1(player)
                 naction = self.startevaluation(pos=posPlayer, target1=p1Type1Target, target3=p1Type3Target,player=1)
                 if value < naction:
                     value = naction
@@ -197,9 +193,7 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                #posPlayer = next_state[1].getPlayerPiecePositions1(player)
-                posPlayer = self.getPlayerPiecePositions1(next_state[1],player)
-
+                posPlayer = next_state[1].getPlayerPiecePositions1(player)
                 naction = self.startevaluation(pos=posPlayer, target1=p2Type2Target, target3=p2Type4Target,player=2)
                 if value < naction:
                     value = naction
@@ -296,12 +290,8 @@ class TeamNameMinimaxAgent(Agent):
                 return max_num  # Max revenue
             return min_num  # Min revenue
 
-        #posPlayer1 = state[1].getPlayerPiecePositions1(1)
-        #posPlayer2 = state[1].getPlayerPiecePositions1(2)
-
-        posPlayer1 = self.getPlayerPiecePositions1(state[1],1)
-        posPlayer2 = self.getPlayerPiecePositions1(state[1],2)
-
+        posPlayer1 = state[1].getPlayerPiecePositions1(1)
+        posPlayer2 = state[1].getPlayerPiecePositions1(2)
 
         p1Type1Target = [[1, 1], [3, 1], [3, 3], [4, 1], [4, 2], [4, 3], [4, 4]]
         p1Type3Target = [[2, 1], [2, 2], [3, 2]]
@@ -415,8 +405,8 @@ class TeamNameMinimaxAgent(Agent):
             if piece_type == 2 and ([row, column] in target2):
                 if row == 19 and column == 1:
                     valueP2 += 13
-                else:
-                    valueP2 += 4*row
+                # else:
+                #    valueP2 += 4*row
             if piece_type == 4 and ([row, column] in target4):
                 valueP2 += 7
             if piece_type == 4 and row == 19 and column == 1:
@@ -544,15 +534,15 @@ class TeamNameMinimaxAgent(Agent):
                     continue
                 if action[0][0] - action[1][0] >= 1:
                     continue
-                if action[0][0] >= 16 :
+                if action[0][0] <= 16 :
                     continue
                 minimax_action_value = self.MinimaxAlgiP2(self.game.succ(state, action), min_num, max_num, 1, 2)
                 if minimax_action_value > value:
                     value = minimax_action_value
                     tmp = action
                     preaction = tmp[::-1]
-       #if rdm == tmp:
-       #     print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
+#       if rdm == tmp:
+#            print('\033[1;30;41m' + 'No action to use but random' + '\033[0m')
         return tmp
 
     ############### 收官部分评价函数值 ########################################
@@ -637,13 +627,13 @@ class TeamNameMinimaxAgent(Agent):
                 # totalDiffRowP1 += abs(row - averOfRowP1)
                 if piece_type == 1 and ([row, column] in targetBlueOrRed):
                     if row == 1 and column == 1:
-                        targetScore[0] += 1300
+                        targetScore[0] += 1000
                         targetScore.append([row,column,"Blue in Peak"])
                     else:
-                        targetScore[0] += 200
+                        targetScore[0] += 50
                         targetScore.append([row,column,"Blue in BLue"])
                 if piece_type == 3 and ([row, column] in targetYellowOrGreen):
-                    targetScore[0] += 1250
+                    targetScore[0] += 1000
                     targetScore.append([row,column,"Yellow in Yellow"])
                 #if piece_type == 1 and ([row,column] in targetYellowOrGreen):
 
@@ -735,8 +725,7 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                #posPlayer1 = next_state[1].getPlayerPiecePositions1(player)
-                posPlayer1 = self.getPlayerPiecePositions1(next_state[1],player)
+                posPlayer1 = next_state[1].getPlayerPiecePositions1(player)
                 # print("PosP1", posPlayer1)
                 naction,positionScore,targetScore = self.lastevaluation(pos=posPlayer1, targetBlueOrRed=p1Type1Target, targetYellowOrGreen=p1Type3Target,player=1)
                 if value < naction:
@@ -756,9 +745,7 @@ class TeamNameMinimaxAgent(Agent):
                     board.board_status[action[1]] = board.board_status[action[0]]
                     board.board_status[action[0]] = 0
                     next_state = (player, board)
-                    #posPlayer = next_state[1].getPlayerPiecePositions1(player)
-                    posPlayer = self.getPlayerPiecePositions1(next_state[1],player)
-
+                    posPlayer = next_state[1].getPlayerPiecePositions1(player)
                     naction, positionScore, targetScore = self.lastevaluation(pos=posPlayer, targetBlueOrRed=p2Type2Target, targetYellowOrGreen=p2Type4Target,player=2)
                     if value < naction:
                         value = naction
@@ -785,7 +772,7 @@ class TeamNameMinimaxAgent(Agent):
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
                 next_state = (player, board)
-                max_action_value,positionScore,targetScore = self.maxEnd(next_state, action)
+                max_action_value,positionScore,targetScore= self.maxEnd(next_state, action)
                 print("action:", action,",value:",max_action_value)
                 print("basic score:",positionScore)
                 print("target score:",targetScore)
@@ -808,22 +795,11 @@ class TeamNameMinimaxAgent(Agent):
                 board = copy.deepcopy(state[1])
                 board.board_status[action[1]] = board.board_status[action[0]]
                 board.board_status[action[0]] = 0
-                backToForthBonus = [0]
                 next_state = (player, board)
                 max_action_value, positionScore, targetScore = self.maxEnd(next_state, action)
-                if (action[0][0] <= 10 and action[1][0] > 10):
-                    backToForthBonus[0] += 100
-                    max_action_value += backToForthBonus[0]
-                    backToForthBonus.append("Across the mid line")
-                if action[0][0] <= 16 and action[1][0] - action[0][0] >= 1:
-                    backToForthBonus[0] += 100
-                    max_action_value += backToForthBonus[0]
-                    backToForthBonus.append("Advance from back")
                 print("action:", action, ",value:", max_action_value)
                 print("basic score:", positionScore)
                 print("target score:", targetScore)
-                print("back to forth bonus:",backToForthBonus)
-
                 if max_action_value > value:
                     bestList = []
                     bestList.append(action)
@@ -873,17 +849,6 @@ class TeamNameMinimaxAgent(Agent):
         else:
             print('\033[1;30;41m' + 'error in choose state of game.' + '\033[0m')
         print("Now step:", step, "Want Run", self.action)
-
-    def getPlayerPiecePositions1(self,board,player):
-
-    # return a list of positions that player's pieces occupy
-        result1 = [(row, col, board.board_status[(row, col)]) for row in range(1, board.size + 1) for col in
-               range(1, board.getColNum(row) + 1) \
-               if board.board_status[(row, col)] == player or board.board_status[(row, col)] == player + 2]
-        result2 = [(row, col, board.board_status[(row, col)]) for row in range(board.size + 1, board.size * 2) for col in
-               range(1, board.getColNum(row) + 1) \
-               if board.board_status[(row, col)] == player or board.board_status[(row, col)] == player + 2]
-        return result1 + result2
 
 import sys, copy, math
 step = 0
